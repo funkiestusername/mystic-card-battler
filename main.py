@@ -4,6 +4,12 @@ import pygame, sys, random
 # colours
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+YELLOW = (0, 255, 255)
+MAGENTA = (255, 0, 255)
+TURQUOISE = (255, 255, 0)
 
 # window settings
 WINDOW_WIDTH = 900
@@ -29,10 +35,14 @@ class Competitor:
         self.max_health = MAX_HEALTH
         self.health = self.max_health
 
+        self.opponent = None
+
         self.deck_image = pygame.image.load("card-back.jpg")
         self.deck_image = pygame.transform.scale(self.deck_image, (100, 200))
         self.deck_rect = self.deck_image.get_rect()
+        self.deck_card_count_y_offset = 0
 
+        self.num_cards_to_draw_this_turn = 1
         self.num_cards_to_draw_next_turn = 1
         self.num_cards_to_play_this_turn = 1
         self.num_cards_to_play_next_turn = 1
@@ -59,10 +69,15 @@ class Competitor:
         self.playing_turn = True
         self.num_cards_to_play_this_turn = self.num_cards_to_play_next_turn
         self.num_cards_to_play_next_turn = 1
-        
-        for i in range(self.num_cards_to_draw_next_turn):
-            self.hand.append(self.deck[0])
-            self.deck = self.deck[1:]
+
+        # auto card drawing
+        # for i in range(self.num_cards_to_draw_next_turn):
+        #     self.hand.append(self.deck[0])
+        #     self.deck = self.deck[1:]
+
+        # manual card drawing
+        self.num_cards_to_draw_this_turn = self.num_cards_to_play_next_turn
+        self.num_cards_to_draw_next_turn = 1
 
         if self.is_next_card_forced:
             for i in range(self.num_cards_to_play_this_turn):
@@ -72,10 +87,25 @@ class Competitor:
         
         self.num_cards_to_draw_next_turn = 1
 
+    def update(self) -> bool: # return whether they finished their turn
+        # check if turn over
+        if self.num_cards_to_draw_this_turn <= 0 or self.num_cards_to_play_this_turn <= 0:
+            self.playing_turn = False
+            self.opponent.playing_turn = True
+            return True
+
+        return False
+
     def draw(self, surface):
+        mouse_pos = pygame.mouse.get_pos()
+
         # draw the deck
         if len(self.deck) > 0:
+            draw_text(surface, str(len(self.deck)), WHITE, 36, (self.deck_rect.centerx, self.deck_rect.centery + self.deck_card_count_y_offset))
             surface.blit(self.deck_image, self.deck_rect)
+
+            if self.deck_rect.collidepoint(mouse_pos) and self.playing_turn:
+                pygame.draw.rect(surface, RED, self.deck_rect, width=3)
 
         # draw the hand
         for card in self.hand:
@@ -88,6 +118,15 @@ class Player(Competitor):
     def __init__(self):
         super().__init__()
         self.deck_rect.bottomleft = (20, WINDOW_HEIGHT - 20)
+        self.deck_card_count_y_offset = -125
+
+    def handle_mouse_click(self, mouse_pos):
+        # saves having all the clicky logic in the main function, plus player is only thing that takes clicky input
+        # only gets called if player is playing their turn
+        if self.deck_rect.collidepoint(mouse_pos) and self.num_cards_to_draw_this_turn > 0:
+            # draw a card
+            self.hand.append(self.deck[0](random.choice((True, False)), self.opponent, self))
+            self.deck = self.deck[1:]
 
 class Computer(Competitor):
     def __init__(self):
@@ -110,9 +149,33 @@ class Card:
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
+class GenericDamage(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "")
+
+        if self.upright:
+            # deal some damage to opponent
+            pass
+        else:
+            # heal small amount to player of card
+            pass
+
+
+class GenericHeal(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "")
+
+        if self.upright:
+            # heal some health to the player of card
+            pass
+        else:
+            # deal small damage to opponent
+            pass
 
 class TheFool(Card):
-    def __init(self):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "TheFool.jpg")
+
         if self.upright:
             ##Play two cards on the Users next turn
             self.played_from.num_cards_to_play_next_turn = 2
@@ -123,7 +186,9 @@ class TheFool(Card):
             self.played_from.health -= 4 - foolrandom
 
 class TheMagician(Card):
-    def __init(self):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "")
+
         if self.upright:
             ##Draw 1 more card next turn
             self.played_from.num_cards_to_draw_next_turn = 2
@@ -133,7 +198,9 @@ class TheMagician(Card):
             ##no idea how implent
 
 class TheHighPriestess(Card):
-    def __init(self):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "")
+
         if self.upright:
             pass
             ##Read and mark 1 card of the opponent
@@ -144,7 +211,9 @@ class TheHighPriestess(Card):
             ##no idea how implent
 
 class TheEmpress(Card):
-    def __init(self):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "TheEmpress.jpg")
+
         if self.upright:
             ##Increase health by two
             self.played_from.max_health = self.played_from.max_health + 2
@@ -154,7 +223,9 @@ class TheEmpress(Card):
             self.played_on.is_next_card_halved = True
 
 class TheEmporer(Card):
-    def __init(self):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "")
+
         if self.upright:
             ##Block the next card the opponent plays
             pass
@@ -165,11 +236,7 @@ class TheEmporer(Card):
             self.played_from.health -= emprandom
 
 ALL_ARCANA_CARDS = [TheFool, TheEmpress]
-ALL_GENERIC_CARDS = []
-
-def update():
-    # called every frame
-    pass
+ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 def main():
     pygame.init()
@@ -178,6 +245,10 @@ def main():
 
     player = Player()
     computer = Computer()
+    player.opponent = computer
+    computer.opponent = player
+
+    player.playing_turn = True
 
     running = True
     while running:
@@ -185,7 +256,13 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
-        update()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == pygame.BUTTON_LEFT:
+                    if player.playing_turn:
+                        player.handle_mouse_click(pygame.mouse.get_pos())
+
+        player.update()
+        computer.update()
 
         window.fill(BLACK)
 
