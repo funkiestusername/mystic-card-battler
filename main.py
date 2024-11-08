@@ -1,6 +1,16 @@
 import pygame, sys, random
 
 
+# colours
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
+
+# window settings
+WINDOW_WIDTH = 900
+WINDOW_HEIGHT = 900
+WINDOW_CAPTION = "Mystic Tarot Card Game Battler Thingmy"
+
+
 def draw_text(surface, text, colour, size, centre):
     font = pygame.font.Font("freesansbold.ttf", size)
     text_surface = font.render(text, True, colour)
@@ -19,6 +29,10 @@ class Competitor:
         self.max_health = MAX_HEALTH
         self.health = self.max_health
 
+        self.deck_image = pygame.image.load("card-back.jpg")
+        self.deck_image = pygame.transform.scale(self.deck_image, (100, 200))
+        self.deck_rect = self.deck_image.get_rect()
+
         self.num_cards_to_draw_next_turn = 1
         self.num_cards_to_play_this_turn = 1
         self.num_cards_to_play_next_turn = 1
@@ -35,7 +49,8 @@ class Competitor:
             self.deck.append(random.choice(ALL_ARCANA_CARDS))
 
         for i in range(MAX_GENERIC):
-            self.deck.append(random.choice(ALL_GENERIC_CARDS))
+            # self.deck.append(random.choice(ALL_GENERIC_CARDS))
+            pass
 
         random.shuffle(self.deck)
         
@@ -46,7 +61,8 @@ class Competitor:
         self.num_cards_to_play_next_turn = 1
         
         for i in range(self.num_cards_to_draw_next_turn):
-            pass
+            self.hand.append(self.deck[0])
+            self.deck = self.deck[1:]
 
         if self.is_next_card_forced:
             for i in range(self.num_cards_to_play_this_turn):
@@ -56,26 +72,43 @@ class Competitor:
         
         self.num_cards_to_draw_next_turn = 1
 
+    def draw(self, surface):
+        # draw the deck
+        if len(self.deck) > 0:
+            surface.blit(self.deck_image, self.deck_rect)
+
+        # draw the hand
+        for card in self.hand:
+            pass
+
+        # draw the health and lives
+
 
 class Player(Competitor):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.deck_rect.bottomleft = (20, WINDOW_HEIGHT - 20)
 
 class Computer(Competitor):
-    pass
+    def __init__(self):
+        super().__init__()
+        self.deck_rect.topright = (WINDOW_WIDTH - 20, 20)
 
 
 class Card:
-    def __init__(self, upright, played_on, played_from):
+    def __init__(self, upright, played_on, played_from, image_file):
         self.damage_amount = 0
         self.heal_amount = 0
         self.upright = upright
         self.played_on = played_on
         self.played_from = played_from
         self.is_marked = False
-        self.image = None
 
-    def draw(self, surface, x, y):
-        pass
+        self.image = pygame.image.load(image_file).convert_alpha()
+        self.rect = self.image.get_rect()
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
 
 
 class TheFool(Card):
@@ -138,14 +171,10 @@ def update():
     # called every frame
     pass
 
-def draw(window):
-    # called every frame
-    pass
-
 def main():
     pygame.init()
-    window = pygame.display.set_mode((800, 800))
-    pygame.display.set_caption("Test")
+    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    pygame.display.set_caption(WINDOW_CAPTION)
 
     player = Player()
     computer = Computer()
@@ -158,9 +187,10 @@ def main():
 
         update()
 
-        window.fill((0, 0, 0))
+        window.fill(BLACK)
 
-
+        player.draw(window)
+        computer.draw(window)
 
         pygame.display.flip()
 
