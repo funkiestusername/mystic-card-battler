@@ -1,4 +1,4 @@
-import pygame, sys, random, time
+import pygame, sys, random
 
 
 # colours
@@ -155,6 +155,9 @@ class Competitor:
         self.opponent.start_turn()
 
     def update(self): # decide whether they finished their turn
+        # clamp health to max health
+        self.health = min(self.health, self.max_health)
+
         # check if done all card moves
         if self.num_cards_to_draw_this_turn <= 0 and self.num_cards_to_play_this_turn <= 0:
             self.finish_turn()
