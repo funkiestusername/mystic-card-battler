@@ -1,4 +1,4 @@
-import pygame, sys, random
+import pygame, sys, random, time
 
 
 # colours
@@ -75,13 +75,13 @@ class Competitor:
 
         self.max_health = MAX_HEALTH
         self.health = self.max_health
-        self.health_icon_image = pygame.image.load("heart.png")
+        self.health_icon_image = pygame.image.load("images/heart.png")
         self.health_icon_image = pygame.transform.scale(self.health_icon_image, (39, 36))
         self.health_icon_rect = self.health_icon_image.get_rect()
 
         self.opponent = None
 
-        self.deck_image = pygame.image.load("card-back.jpg")
+        self.deck_image = pygame.image.load("images/card-back.jpg")
         self.deck_image = pygame.transform.scale(self.deck_image, (100, 200))
         self.deck_rect = self.deck_image.get_rect()
         self.deck_card_count_y_offset = 0
@@ -133,9 +133,7 @@ class Competitor:
             for i in range(self.num_cards_to_play_this_turn):
                 # all cards played are random :(
                 card = random.choice(self.hand)
-
-        
-        self.num_cards_to_draw_next_turn = 1
+                self.play_card(card)
 
     def draw_card(self):
         # take the top card from the deck
@@ -143,8 +141,16 @@ class Competitor:
         self.hand.append(self.deck[0](random.choice((True, False)), self.opponent, self))
         self.deck = self.deck[1:]
 
+    def play_card(self, card):
+        self.num_cards_to_play_this_turn -= 1
+        card.play()
+        self.hand.remove(card)
+        self.deck.append(type(card)) # recycle card
+
     def finish_turn(self):
         self.playing_turn = False
+        self.num_cards_to_play_this_turn = 1
+        self.num_cards_to_draw_this_turn = 1
         self.opponent.start_turn()
 
     def update(self): # decide whether they finished their turn
@@ -212,9 +218,7 @@ class Player(Competitor):
         for card in self.hand.copy():
             if card.rect.collidepoint(mouse_pos) and self.num_cards_to_play_this_turn > 0:
                 # play the clicked card
-                card.play()
-                self.hand.remove(card)
-                self.num_cards_to_play_this_turn -= 1
+                self.play_card(card)
 
 class Computer(Competitor):
     def __init__(self):
@@ -224,26 +228,44 @@ class Computer(Competitor):
         self.hide_cards_in_hand = True
         self.health_icon_rect.bottom = 300
 
+    def have_turn(self):
+        # computer turn logic
+        # will sleep briefly between moves so player can process what they're doing
+
+        # general algorithm
+        # draw a card
+        # if a card dealing more damage than player has health, play it
+        # if self health less than a threshold, heal if available
+
+        # currently just plays a random card
+        for i in range(self.num_cards_to_draw_this_turn):
+            time.sleep(0.5)
+            self.draw_card()
+            return
+
+        for i in range(self.num_cards_to_play_this_turn):
+            self.play_card(random.choice(self.hand))
+            return
+
 
 class Card:
     def __init__(self, upright, played_on, played_from, image_file):
-        self.damage_amount = 0
-        self.heal_amount = 0
         self.upright = upright
         self.played_on = played_on
         self.played_from = played_from
-        self.is_marked = False
-
-        self.upright_tooltip = ""
-        self.revered_tooltip = ""
-        self.tooltip = None
-
         self.image = pygame.image.load(image_file).convert_alpha()
         self.image = pygame.transform.scale(self.image, (100, 200))
         self.rect = self.image.get_rect()
-
         if not self.upright:
             self.image = pygame.transform.flip(self.image, False, True)
+
+        self.damage_amount = 0
+        self.heal_amount = 0
+        self.is_marked = False
+        self.is_damage_random = False
+        self.upright_tooltip = ""
+        self.revered_tooltip = ""
+        self.tooltip = None
 
     def create_tooltip(self):
         self.tooltip = Tooltip(self.upright_tooltip, self.revered_tooltip, self.upright)
@@ -254,7 +276,7 @@ class Card:
 
 class GenericDamage(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "generic-damage.png")
+        super().__init__(upright, played_on, played_from, "images/generic-damage.png")
         self.damage_amount = 2
         self.heal_amount = 1
         self.upright_tooltip = f"Deal {self.damage_amount} to opponent"
@@ -269,10 +291,9 @@ class GenericDamage(Card):
             # heal small amount to player of card
             self.played_from.health += self.heal_amount
 
-
 class GenericHeal(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "generic-heal.png")
+        super().__init__(upright, played_on, played_from, "images/generic-heal.png")
         self.damage_amount = 1
         self.heal_amount = 2
         self.upright_tooltip = f"Heal {self.heal_amount} to yourself"
@@ -289,11 +310,12 @@ class GenericHeal(Card):
 
 class TheFool(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "TheFool.jpg")
+        super().__init__(upright, played_on, played_from, "images/TheFool.jpg")
         self.upright_tooltip = f"Play two cards next turn"
         self.revered_tooltip = f"Deal 1 to 4 damage to opponent, deal 4-X to yourself"
         self.create_tooltip()
 
+        self.is_damage_random = True
         self.damage_amount = random.randint(1, 4)
 
     def play(self):
@@ -336,7 +358,7 @@ class TheHighPriestess(Card):
 
 class TheEmpress(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "TheEmpress.jpg")
+        super().__init__(upright, played_on, played_from, "images/TheEmpress.jpg")
         self.upright_tooltip = f"Increase max health by 2"
         self.revered_tooltip = f"Half numerical effectiveness of next opponent card"
         self.create_tooltip()
@@ -397,8 +419,11 @@ def main():
                     if player.playing_turn:
                         player.handle_mouse_click(pygame.mouse.get_pos())
 
-        player.update()
         computer.update()
+        player.update()
+
+        if computer.playing_turn:
+            computer.have_turn()
 
         window.fill(BLACK)
 
