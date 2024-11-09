@@ -95,7 +95,8 @@ class Competitor:
         self.is_next_card_halved = False
 
         self.hide_cards_in_hand = False
-        
+
+        self.has_won = False
         self.playing_turn = False
 
         self.init_deck()
@@ -159,6 +160,10 @@ class Competitor:
             self.finish_turn()
 
         # another turn ending condition for time limit running out
+
+        # check if dead
+        if self.health <= 0:
+            self.opponent.has_won = True
 
     def draw(self, surface):
         mouse_pos = pygame.mouse.get_pos()
@@ -424,16 +429,22 @@ def main():
                     if player.playing_turn:
                         player.handle_mouse_click(pygame.mouse.get_pos())
 
-        computer.update()
-        player.update()
+        if not player.has_won and not computer.has_won:
+            computer.update()
+            player.update()
 
-        if computer.playing_turn:
-            computer.have_turn(dt)
+            if computer.playing_turn:
+                computer.have_turn(dt)
 
         window.fill(BLACK)
 
         player.draw(window)
         computer.draw(window)
+
+        if player.has_won:
+            draw_text(window, "You won the battle!", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        elif computer.has_won:
+            draw_text(window, "Tough luck, the computer won.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
 
         pygame.display.flip()
 
