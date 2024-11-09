@@ -26,6 +26,8 @@ def draw_text(surface, text, colour, size, centre):
 MAX_CARDS = 20
 MAX_ARCANA = 3
 MAX_GENERIC = 17
+assert MAX_CARDS - MAX_ARCANA - MAX_GENERIC == 0, f"arcana max and generic max MUST add to {MAX_CARDS}"
+STARTING_HAND_CARD_COUNT = 5
 MAX_HEALTH = 10
 
 class Competitor:
@@ -49,6 +51,8 @@ class Competitor:
 
         self.is_next_card_forced = False
         self.is_next_card_halved = False
+
+        self.hide_cards_in_hand = False
         
         self.playing_turn = False
 
@@ -59,10 +63,14 @@ class Competitor:
             self.deck.append(random.choice(ALL_ARCANA_CARDS))
 
         for i in range(MAX_GENERIC):
-            # self.deck.append(random.choice(ALL_GENERIC_CARDS))
-            pass
+            self.deck.append(random.choice(ALL_GENERIC_CARDS))
 
         random.shuffle(self.deck)
+
+    def init_hand(self):
+        # give 5 starting cards from the deck to start off with
+        for i in range(STARTING_HAND_CARD_COUNT):
+            self.draw_card()
         
     def start_turn(self):
         # called at the start of the turn only once
@@ -87,14 +95,22 @@ class Competitor:
         
         self.num_cards_to_draw_next_turn = 1
 
-    def update(self) -> bool: # return whether they finished their turn
-        # check if turn over
-        if self.num_cards_to_draw_this_turn <= 0 or self.num_cards_to_play_this_turn <= 0:
-            self.playing_turn = False
-            self.opponent.playing_turn = True
-            return True
+    def draw_card(self):
+        # take the top card from the deck
+        self.num_cards_to_draw_this_turn -= 1
+        self.hand.append(self.deck[0](random.choice((True, False)), self.opponent, self))
+        self.deck = self.deck[1:]
 
-        return False
+    def finish_turn(self):
+        self.playing_turn = False
+        self.opponent.start_turn()
+
+    def update(self): # decide whether they finished their turn
+        # check if done all card moves
+        if self.num_cards_to_draw_this_turn <= 0 and self.num_cards_to_play_this_turn <= 0:
+            self.finish_turn()
+
+        # another turn ending condition for time limit running out
 
     def draw(self, surface):
         mouse_pos = pygame.mouse.get_pos()
@@ -104,12 +120,25 @@ class Competitor:
             draw_text(surface, str(len(self.deck)), WHITE, 36, (self.deck_rect.centerx, self.deck_rect.centery + self.deck_card_count_y_offset))
             surface.blit(self.deck_image, self.deck_rect)
 
-            if self.deck_rect.collidepoint(mouse_pos) and self.playing_turn:
+            if self.deck_rect.collidepoint(mouse_pos) and self.playing_turn and self.num_cards_to_draw_this_turn > 0:
                 pygame.draw.rect(surface, RED, self.deck_rect, width=3)
 
         # draw the hand
-        for card in self.hand:
-            pass
+        for i in range(len(self.hand)):
+            if not self.hide_cards_in_hand:
+                card = self.hand[i]
+
+                card.rect.left = self.deck_rect.right + i * card.rect.width + 10 * (i + 1)
+                card.rect.y = self.deck_rect.y
+
+                surface.blit(card.image, card.rect)
+
+                if card.rect.collidepoint(mouse_pos) and self.playing_turn and self.num_cards_to_play_this_turn > 0:
+                    pygame.draw.rect(surface, RED, card.rect, width=3)
+            else:
+                rect = pygame.Rect(0, self.deck_rect.y, self.deck_rect.width, self.deck_rect.height)
+                rect.right = self.deck_rect.left - i * self.deck_rect.width - 10 * (i + 1)
+                surface.blit(self.deck_image, rect)
 
         # draw the health and lives
 
@@ -125,13 +154,14 @@ class Player(Competitor):
         # only gets called if player is playing their turn
         if self.deck_rect.collidepoint(mouse_pos) and self.num_cards_to_draw_this_turn > 0:
             # draw a card
-            self.hand.append(self.deck[0](random.choice((True, False)), self.opponent, self))
-            self.deck = self.deck[1:]
+            self.draw_card()
 
 class Computer(Competitor):
     def __init__(self):
         super().__init__()
         self.deck_rect.topright = (WINDOW_WIDTH - 20, 20)
+        self.deck_card_count_y_offset = 125
+        self.hide_cards_in_hand = True
 
 
 class Card:
@@ -144,33 +174,46 @@ class Card:
         self.is_marked = False
 
         self.image = pygame.image.load(image_file).convert_alpha()
+        self.image = pygame.transform.scale(self.image, (100, 200))
         self.rect = self.image.get_rect()
 
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
+        if not self.upright:
+            self.image = pygame.transform.flip(self.image, False, True)
+
+    def play(self):
+        # override to add custom play logic
+        pass
 
 class GenericDamage(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "")
+        super().__init__(upright, played_on, played_from, "generic-damage.png")
 
+        self.damage_amount = 2
+        self.heal_amount = 1
+
+    def play(self):
         if self.upright:
             # deal some damage to opponent
-            pass
+            self.played_on.health -= self.damage_amount
         else:
             # heal small amount to player of card
-            pass
+            self.played_from.health += self.heal_amount
 
 
 class GenericHeal(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "")
+        super().__init__(upright, played_on, played_from, "generic-heal.png")
 
+        self.damage_amount = 1
+        self.heal_amount = 2
+
+    def play(self):
         if self.upright:
             # heal some health to the player of card
-            pass
+            self.played_from.health += self.heal_amount
         else:
             # deal small damage to opponent
-            pass
+            self.played_on.health -= self.damage_amount
 
 class TheFool(Card):
     def __init__(self, upright, played_on, played_from):
@@ -248,7 +291,10 @@ def main():
     player.opponent = computer
     computer.opponent = player
 
-    player.playing_turn = True
+    player.init_hand()
+    computer.init_hand()
+
+    player.start_turn()
 
     running = True
     while running:
