@@ -25,8 +25,8 @@ def draw_text(surface, text, colour, size, centre) -> pygame.Rect:
     return text_rect
 
 MAX_CARDS = 20
-MAX_ARCANA = 3
-MAX_GENERIC = 17
+MAX_ARCANA = 10
+MAX_GENERIC = 10
 assert MAX_CARDS - MAX_ARCANA - MAX_GENERIC == 0, f"arcana max and generic max MUST add to {MAX_CARDS}"
 STARTING_HAND_CARD_COUNT = 5
 MAX_HEALTH = 10
@@ -93,6 +93,7 @@ class Competitor:
 
         self.is_next_card_forced = False
         self.is_next_card_halved = False
+        self.is_next_card_blocked = False
 
         self.hide_cards_in_hand = False
 
@@ -144,9 +145,13 @@ class Competitor:
 
     def play_card(self, card):
         self.num_cards_to_play_this_turn -= 1
-        card.play()
         self.hand.remove(card)
-        self.deck.append(type(card)) # recycle card
+        self.deck.append(type(card))  # recycle card
+        if not self.is_next_card_blocked:
+            # only properly play the card if it hasn't been blocked
+            card.play()
+        else:
+            self.is_next_card_blocked = False
 
     def finish_turn(self):
         self.playing_turn = False
@@ -198,7 +203,7 @@ class Competitor:
 
         for card in self.hand:
             # render a tooltip for the card
-            if card.rect.collidepoint(mouse_pos):
+            if card.rect.collidepoint(mouse_pos) and not self.hide_cards_in_hand:
                 card.tooltip.draw(surface, mouse_pos)
 
         # draw the health and lives
@@ -242,10 +247,11 @@ class Computer(Competitor):
         # computer turn logic
         # will sleep briefly between moves so player can process what they're doing
 
-        # general algorithm
+        # general algorithm (in no particular order
         # draw a card
         # if a card dealing more damage than player has health, play it
         # if self health less than a threshold, heal if available
+        # if at max health, try not to play healing card
 
         self.move_timer += dt
         if self.move_timer >= 0.5:
@@ -274,6 +280,8 @@ class Card:
 
         self.damage_amount = 0
         self.heal_amount = 0
+        self.draw_increase_amount = 0
+        self.play_increase_amount = 0
         self.is_marked = False
         self.is_damage_random = False
         self.upright_tooltip = ""
@@ -292,6 +300,7 @@ class GenericDamage(Card):
         super().__init__(upright, played_on, played_from, "images/generic-damage.png")
         self.damage_amount = 2
         self.heal_amount = 1
+
         self.upright_tooltip = f"Deal {self.damage_amount} to opponent"
         self.revered_tooltip = f"Heal {self.heal_amount} to yourself"
         self.create_tooltip()
@@ -309,6 +318,7 @@ class GenericHeal(Card):
         super().__init__(upright, played_on, played_from, "images/generic-heal.png")
         self.damage_amount = 1
         self.heal_amount = 2
+
         self.upright_tooltip = f"Heal {self.heal_amount} to yourself"
         self.revered_tooltip = f"Damage {self.damage_amount} to opponent"
         self.create_tooltip()
@@ -324,17 +334,19 @@ class GenericHeal(Card):
 class TheFool(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "images/TheFool.jpg")
-        self.upright_tooltip = f"Play two cards next turn"
+        self.is_damage_random = True
+        self.damage_amount = random.randint(1, 4)
+        self.play_increase_amount = 1
+
+        self.upright_tooltip = f"Play {self.play_increase_amount} extra card(s) next turn"
         self.revered_tooltip = f"Deal 1 to 4 damage to opponent, deal 4-X to yourself"
         self.create_tooltip()
 
-        self.is_damage_random = True
-        self.damage_amount = random.randint(1, 4)
 
     def play(self):
         if self.upright:
             ##Play two cards on the Users next turn
-            self.played_from.num_cards_to_play_next_turn = 2
+            self.played_from.num_cards_to_play_next_turn += self.play_increase_amount
         else:
             ##deal between 1 and 4 damage to the opponent, deals 4-X to the user
             self.played_on.health -= self.damage_amount
@@ -343,12 +355,15 @@ class TheFool(Card):
 class TheMagician(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "")
+        self.draw_increase_amount = 1
+
+        self.upright_tooltip = f"Draw {self.draw_increase_amount} extra card(s) next turn"
         self.create_tooltip()
 
     def play(self):
         if self.upright:
             ##Draw 1 more card next turn
-            self.played_from.num_cards_to_draw_next_turn = 2
+            self.played_from.num_cards_to_draw_next_turn += self.draw_increase_amount
         else:
             pass
             ##makes the opponent chose a random card
@@ -361,13 +376,19 @@ class TheHighPriestess(Card):
 
     def play(self):
         if self.upright:
-            pass
             ##Read and mark 1 card of the opponent
-        ##no idea how implent
+            card_to_mark = random.choice(self.played_on.hand)
+            card_to_mark.is_marked = True
         else:
-            pass
             ##Swap a card with the opponent
-            ##no idea how implent
+            self.played_from.hand.remove(self) # so this card doesn't get chosen to swap
+            opponent_card_index = random.randint(0, len(self.played_on.hand) - 1)
+            own_card_index = random.randint(0, len(self.played_from.hand) - 1)
+
+            tmp = self.played_from.hand[own_card_index]
+            self.played_from.hand[own_card_index] = self.played_on.hand[opponent_card_index]
+            self.played_on.hand[opponent_card_index] = tmp
+
 
 class TheEmpress(Card):
     def __init__(self, upright, played_on, played_from):
@@ -387,20 +408,23 @@ class TheEmpress(Card):
 
 class TheEmperor(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "")
+        super().__init__(upright, played_on, played_from, "images/the-emperor.jpg")
         self.damage_amount = random.randint(1, 4)
+
+        self.upright_tooltip = "Block the next card played by your opponent"
+        self.revered_tooltip = "Deal between 1 and 4 damage to both you and your opponent"
         self.create_tooltip()
 
     def play(self):
         if self.upright:
             ##Block the next card the opponent plays
-            pass
+            self.played_on.is_next_card_blocked = True
         else:
             ##deal between 1 and 4 damage to the opponent, same to yourself
             self.played_on.health -= self.damage_amount
             self.played_from.health -= self.damage_amount
 
-ALL_ARCANA_CARDS = [TheFool, TheEmpress]
+ALL_ARCANA_CARDS = [TheFool, TheEmpress, TheEmperor]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 def main():
