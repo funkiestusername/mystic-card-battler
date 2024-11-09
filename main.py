@@ -223,12 +223,14 @@ class Player(Competitor):
 class Computer(Competitor):
     def __init__(self):
         super().__init__()
+        self.move_timer = 0
+
         self.deck_rect.topright = (WINDOW_WIDTH - 20, 20)
         self.deck_card_count_y_offset = 125
         self.hide_cards_in_hand = True
         self.health_icon_rect.bottom = 300
 
-    def have_turn(self):
+    def have_turn(self, dt):
         # computer turn logic
         # will sleep briefly between moves so player can process what they're doing
 
@@ -237,15 +239,18 @@ class Computer(Competitor):
         # if a card dealing more damage than player has health, play it
         # if self health less than a threshold, heal if available
 
-        # currently just plays a random card
-        for i in range(self.num_cards_to_draw_this_turn):
-            time.sleep(0.5)
-            self.draw_card()
-            return
+        self.move_timer += dt
+        if self.move_timer >= 0.5:
+            self.move_timer = 0
 
-        for i in range(self.num_cards_to_play_this_turn):
-            self.play_card(random.choice(self.hand))
-            return
+            # currently just plays a random card
+            for i in range(self.num_cards_to_draw_this_turn):
+                self.draw_card()
+                return
+
+            for i in range(self.num_cards_to_play_this_turn):
+                self.play_card(random.choice(self.hand))
+                return
 
 
 class Card:
@@ -372,7 +377,7 @@ class TheEmpress(Card):
             ##half the effectiveness of the next card played by an opponent, rounded down
             self.played_on.is_next_card_halved = True
 
-class TheEmporer(Card):
+class TheEmperor(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "")
         self.damage_amount = random.randint(1, 4)
@@ -408,7 +413,7 @@ def main():
     fps_clock = pygame.time.Clock()
     running = True
     while running:
-        fps_clock.tick(60)
+        dt = fps_clock.tick(60) / 1000
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -423,7 +428,7 @@ def main():
         player.update()
 
         if computer.playing_turn:
-            computer.have_turn()
+            computer.have_turn(dt)
 
         window.fill(BLACK)
 
