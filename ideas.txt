@@ -1,0 +1,149 @@
+Cards:
+The Fool:
+Upright:
+Play two cards on the Users next turn
+Reversed:
+deal between 1 and 4 damage to the opponent, deals 4-X to the user
+
+The Magician:
+Upright:
+Draw 1 more card next turn
+Reversed:
+Disguises the next card played as another random, excluding Reversed Magician
+
+The High Priestess:
+Upright:
+Read and mark 1 card of the opponent
+Reversed:
+Swap a card with the opponent
+
+The Empress:
+Upright:
+Increase health by two
+Reversed:
+half the effectiveness of the next card played by an opponent, rounded down
+
+The Emperor:
+Upright:
+Block the opponents next damaging card
+Reversed:
+Deal between 1 and 4 damage to the opponent and the same to yourself
+
+The Hierophant:
+Upright:
+double next card played
+Reversed:
+double the next negative effect of an opponents card
+
+The Lovers:
+Upright:
+Play the next card the opponent plays
+Reversed:
+Shuffle both you and your opponents decks
+
+The Chariot:
+Upright:
+deal 2 damage to the opponent and add 2 health
+Reversed:
+Deal 5 damage to the opponent and half rounded down to user
+
+Strength:
+Upright:
+Add 1 stack of Strength for 3 turns (Strength increases all damage sources by 1)
+Reversed:
+Add 1 stack of Weakness to the opponent (Weakness decreases all damage sources by 1)
+
+The Hermit:
+Upright:
+see the next three cards in your deck, in order they will be drawn
+Reversed:
+No cards can effect you on the next turn, and you cannot play any cards
+
+The Wheel of Fortune:
+Upright:
+randomly select and play (damage1,damage 2, heal 1, heal 2, draw1, and play a random major arcana)
+(1/20 chance for major arcana, then 1 in 5 for the rest) (not one of the player's card)
+Reversed:
+The opponent has (damage1, damage 2, damage 3, discard 1 (randomly selects card), or heal1), selected and add to hand
+targets themselves with it and plays it (heal 1 has half the chance of the others)
+
+
+Justice:
+Upright:
+Mirror the card the opponent plays: .i.e damage opponent if they damage you or heal if they heal themselves
+Reversed:
+reverse the target of the opponents card
+
+The Hanged Man:
+Upright:
+Sacrifice health in exchange for dealing (health*1.5) damage rounded down
+Reversed:
+Skip the opponents turn
+
+Death:
+Upright:
+Remove an opponents card
+Reversed:
+Deal 1 damage per turn to the opponent for 5 turns
+
+Temperance:
+Upright:
+Double time limit for the rest of the level
+Reversed:
+Next turn play 3 cards
+
+The Devil:
+Upright:
+opponent has all healing cards removed from deck
+Reversed:
+remove all healing cards from your deck but double damage (excluding arcana's) for level
+
+The Tower:
+Upright:
+In 5 turns deal 8 damage to the opponent
+Reversed:
+Stop the tower, and delay any incoming damage to in two turns time
+(so two turns of no damage but then on the third it is all dealt)
+
+The Star:
+Upright:
+Full Heal
+Reversed:
+For 5 turns opponent heals go to you instead
+
+The Moon:
+Upright:
+Learn what arcana's the opponent has
+Reversed:
+The opponent now doesn't know their health or how much damage they are taking
+
+The Sun:
+Upright:
+Double effectiveness of healing cards for user
+Reversed:
+Half the opponents healing
+
+Judgement:
+Upright:
+learn the order of your deck until it is next shuffled
+Reversed:
+learn the order of your opponents deck until it is next shuffled
+
+The World:
+Upright:
+place all non arcana cards into bottom of the deck,
+add all arcana to your hand and chose whether to play them reversed or upright
+Reversed:
+Remove all arcana's from play for the rest of the level,
+but add 1 to all the users cards
+
+
+
+
+
+
+
+
+
+
+
