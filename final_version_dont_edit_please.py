@@ -477,8 +477,29 @@ class TheEmperor(Card):
             self.played_on.health -= self.damage_amount
             self.played_from.health -= self.damage_amount
 
+class TheChariot(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/TheChariot.jpg")
 
-ALL_ARCANA_CARDS = [TheMagician]
+        self.upright_tooltip = "Deal 2 damage to the opponent and heal 2"
+        self.revered_tooltip = "Deal 5 damage to the opponent and half rounded down to use"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Deal 2 damage to the opponent and add 2 health
+            self.damage_amount = 2
+            self.heal_amount = 2
+            self.played_on.health -= self.damage_amount
+            self.played_from.health += self.heal_amount
+        else:
+            ##Deal 5 damage to the opponent and half rounded down to use
+            self.damage_amount = 5
+            self.played_on.health -= self.damage_amount
+            self.played_from.health -= int(self.damage_amount/2)
+
+
+ALL_ARCANA_CARDS = [TheFool, TheEmperor, TheEmpress, TheMagician, TheChariot]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 def main():
