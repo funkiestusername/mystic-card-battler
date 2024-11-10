@@ -1,5 +1,7 @@
 import pygame, sys, random, time
 
+from main import ALL_ARCANA_CARDS
+
 # colours
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
@@ -103,6 +105,9 @@ class Competitor:
         self.num_cards_to_play_this_turn = 1
         self.num_cards_to_play_next_turn = 1
 
+        self.play_opponent_card_next = False
+        self.last_card_played = None
+
         self.is_next_card_forced = False
         self.is_next_card_halved = False
         self.is_next_card_blocked = False
@@ -163,6 +168,9 @@ class Competitor:
         self.num_cards_to_play_this_turn = 1
         self.num_cards_to_play_next_turn = 1
 
+        self.play_opponent_card_next = False
+        self.last_card_played = None
+
         self.is_next_card_forced = False
         self.is_next_card_halved = False
         self.is_next_card_blocked = False
@@ -178,9 +186,11 @@ class Competitor:
             card.draw_increase_amount = card.draw_increase_amount // 2
             card.play_increase_amount = card.play_increase_amount // 2
 
+        self.last_card_played = card
         self.num_cards_to_play_this_turn -= 1
-        self.hand.remove(card)
-        self.deck.append(type(card))  # recycle card
+        if not self.play_opponent_card_next:
+            self.hand.remove(card)
+            self.deck.append(type(card))  # recycle card
         if not self.is_next_card_blocked:
             # only properly play the card if it hasn't been blocked
             card.play()
@@ -193,7 +203,7 @@ class Competitor:
         self.num_cards_to_draw_this_turn = 1
         self.opponent.start_turn()
 
-    def update(self):  # decide whether they finished their turn
+    def update(self):
         # clamp health to max health
         self.health = min(self.health, self.max_health)
 
@@ -201,11 +211,17 @@ class Competitor:
         if self.num_cards_to_draw_this_turn <= 0 and self.num_cards_to_play_this_turn <= 0:
             self.finish_turn()
 
-        # another turn ending condition for time limit running out
+        if self.play_opponent_card_next and self.playing_turn and self.opponent.last_card_played is not None:
+            self.opponent.last_card_played.played_from = self
+            self.opponent.last_card_played.played_on = self.opponent
+            self.play_card(self.opponent.last_card_played)
+            self.play_opponent_card_next = False
 
         # check if dead
         if self.health <= 0:
             self.opponent.has_won = True
+
+
 
     def draw(self, surface):
         mouse_pos = pygame.mouse.get_pos()
@@ -257,10 +273,7 @@ class Competitor:
                 rect.right = self.health_icon_rect.right - i * self.health_icon_rect.width
                 surface.blit(self.health_icon_image, rect)
 
-        if self.is_computer:
-            draw_text(surface, f"Lives: {self.lives}", TURQUOISE, 48, left_centre=(0, WINDOW_HEIGHT // 2 - 120))
-        else:
-            draw_text(surface, f"Lives: {self.lives}", TURQUOISE, 48, right_centre=(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + 120))
+        draw_text(surface, f"Lives: {self.lives}", TURQUOISE, 48, right_centre=(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + 120))
 
 class Player(Competitor):
     def __init__(self):
@@ -549,6 +562,23 @@ class TheEmperor(Card):
             self.played_on.health -= self.damage_amount
             self.played_from.health -= self.damage_amount
 
+class TheLovers(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/the-lovers.jpg")
+
+        self.upright_tooltip = "Play the next card the opponent play"
+        self.revered_tooltip = "Shuffle both you and your opponents decks"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Play the next card the opponent plays
+            self.played_from.play_opponent_card_next = True
+        else:
+            ##Shuffle both you and your opponents decks
+            random.shuffle(self.played_on.deck)
+            random.shuffle(self.played_from.deck)
+
 class TheChariot(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "images/TheChariot.jpg")
@@ -571,7 +601,7 @@ class TheChariot(Card):
             self.played_from.health -= int(self.damage_amount/2)
 
 
-ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess]
+ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 player = Player()
