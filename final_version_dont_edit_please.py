@@ -90,6 +90,8 @@ class Competitor:
         self.max_health = MAX_HEALTH
         self.health = self.max_health
         self.health_icon_image = pygame.image.load("images/heart.png")
+        self.empty_heart_image = pygame.image.load("images/empty-heart.png")
+        self.empty_heart_image = pygame.transform.scale(self.empty_heart_image, (39, 36))
         self.health_icon_image = pygame.transform.scale(self.health_icon_image, (39, 36))
         self.health_icon_rect = self.health_icon_image.get_rect()
 
@@ -287,6 +289,17 @@ class Competitor:
                 rect = pygame.Rect(0, self.health_icon_rect.y, self.health_icon_rect.width, self.health_icon_rect.height)
                 rect.right = self.health_icon_rect.right - i * self.health_icon_rect.width
                 surface.blit(self.health_icon_image, rect)
+
+        # draw empty hearts to show max health
+        for i in range(self.max_health - self.health):
+            if self.is_computer:
+                rect = pygame.Rect(0, self.health_icon_rect.y, self.health_icon_rect.width, self.health_icon_rect.height)
+                rect.left = self.health_icon_rect.left + (self.health * self.health_icon_rect.width) + (i * self.health_icon_rect.width)
+                surface.blit(self.empty_heart_image, rect)
+            else:
+                rect = pygame.Rect(0, self.health_icon_rect.y, self.health_icon_rect.width, self.health_icon_rect.height)
+                rect.right = self.health_icon_rect.right - self.health_icon_rect.width * self.health - i * self.health_icon_rect.width
+                surface.blit(self.empty_heart_image, rect)
 
         if not self.is_computer:
             draw_text(surface, f"Lives: {self.lives}", TURQUOISE, 48, right_centre=(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + 120))
@@ -647,10 +660,6 @@ def play_level(window, level):
     background = pygame.image.load("images/background.png").convert_alpha()
     background = pygame.transform.scale(background, (900, 900))
 
-    pygame.mixer.init()
-    bg_music = pygame.mixer.Sound(background_music)
-    bg_music.play(-1)
-
     player.reset()
     computer.reset()
 
@@ -773,10 +782,14 @@ background_music = "testmusic2.wav"
 def main():
     global player, computer
     pygame.init()
+    pygame.mixer.init()
     window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption(WINDOW_CAPTION)
 
     main_menu(window)
+
+    bg_music = pygame.mixer.Sound(background_music)
+    bg_music.play(-1)
 
     level = 1
 
