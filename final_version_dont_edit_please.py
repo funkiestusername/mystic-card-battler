@@ -1,5 +1,3 @@
-from unittest.mock import right
-
 import pygame, sys, random, time
 
 # colours
