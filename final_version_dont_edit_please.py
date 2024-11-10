@@ -432,6 +432,19 @@ class Computer(Competitor):
                             self.revealed_cards = 1
                             return
 
+                        best_damage_card = self.hand[0]
+                        found_best_damage = False
+                        for card in self.hand.copy():
+                            if card.damage_amount > best_damage_card:
+                                if card.damage_amount < self.health or not card.does_damage_to_yourself:
+                                    best_damage_card = card
+                                    found_best_damage = True
+                        if found_best_damage:
+                            best_damage_card.is_hidden = False
+                            self.card_to_play = best_damage_card
+                            self.revealed_cards = 1
+                            return
+
                         card = random.choice(self.hand)
                         card.is_hidden = False
                         self.card_to_play = card
@@ -481,6 +494,7 @@ class Card:
         self.tooltip = None
         self.is_hidden = True
         self.is_healing = False
+        self.does_damage_to_yourself = False
 
     def create_tooltip(self):
         self.tooltip = Tooltip(self.upright_tooltip, self.revered_tooltip, self.upright)
@@ -611,6 +625,7 @@ class TheEmperor(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "images/the-emperor.jpg")
         self.damage_amount = random.randint(1, 4)
+        self.does_damage_to_yourself = True
 
         self.upright_tooltip = "Block the next card played by your opponent"
         self.revered_tooltip = "Deal between 1 and 4 damage to both you and your opponent"
@@ -711,6 +726,7 @@ class TheTower(Card):
         self.upright_tooltip = "8 damage to you then 8 damage to the opponent"
         self.revered_tooltip = "heal both for 8"
         self.create_tooltip()
+        self.does_damage_to_yourself = True
 
     def play(self):
         if self.upright:
