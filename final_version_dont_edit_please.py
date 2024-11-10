@@ -1,7 +1,5 @@
 import pygame, sys, random, time
 
-from main import ALL_ARCANA_CARDS
-
 # colours
 BLACK = (0, 0, 0)
 WHITE = (255, 255, 255)
