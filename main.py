@@ -440,7 +440,7 @@ class TheEmperor(Card):
 
 class TheHierophant(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/the-emperor.jpg")
+        super().__init__(upright, played_on, played_from, "images/the-hierophant.jpg.jpg")
 
 
         self.upright_tooltip = "Double's the effectiveness of the next card played"
@@ -458,7 +458,7 @@ class TheHierophant(Card):
 
 class TheLovers(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/the-emperor.jpg")
+        super().__init__(upright, played_on, played_from, "images/the-lovers.jpg")
 
 
         self.upright_tooltip = "Play the next card the opponent play"
@@ -475,7 +475,7 @@ class TheLovers(Card):
 
 class TheChariot(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/the-emperor.jpg")
+        super().__init__(upright, played_on, played_from, "images/TheChariot.jpg")
 
 
         self.upright_tooltip = "Deal 2 damage to the opponent and heal 2"
@@ -497,7 +497,7 @@ class TheChariot(Card):
 
 class Strength(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/the-emperor.jpg")
+        super().__init__(upright, played_on, played_from, "images/strength.jpg")
 
 
         self.upright_tooltip = "Increases all damage by 1 for 3 turns"
