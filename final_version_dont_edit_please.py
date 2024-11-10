@@ -647,6 +647,10 @@ def play_level(window, level):
     background = pygame.image.load("images/background.png").convert_alpha()
     background = pygame.transform.scale(background, (900, 900))
 
+    pygame.mixer.init()
+    bg_music = pygame.mixer.Sound(background_music)
+    bg_music.play(-1)
+
     player.reset()
     computer.reset()
 
@@ -709,11 +713,70 @@ def play_level(window, level):
             time.sleep(3)
             return False
 
+class MenuButton:
+    def __init__(self, x, y, width, height, text):
+        self.rect = pygame.Rect(x, y, width, height)
+        self.text = text
+
+    def draw(self, surface):
+        draw_text(surface, self.text, WHITE, 64, centre=self.rect.center)
+
+        if self.is_over(pygame.mouse.get_pos()):
+            pygame.draw.rect(surface, YELLOW, self.rect, width=3)
+
+    def is_over(self, pos):
+        return self.rect.left < pos[0] < self.rect.right and self.rect.top < pos[1] < self.rect.bottom
+
+def main_menu(window):
+    music_options = ["alt-rock.wav", "testmusic2.wav"]
+    selected_music = 0
+
+    quit_button = MenuButton(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 100, 100, 75, "Quit")
+    play_button = MenuButton(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2, 100, 70, "Play")
+
+
+    in_menu = True
+    while in_menu:
+        music_button = MenuButton(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100, 100, 70,
+                                  f"Music: {music_options[selected_music]}")
+        global background_music
+        background_music = music_options[selected_music]
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+
+                if quit_button.is_over(mouse_pos):
+                    pygame.quit()
+                    sys.exit()
+
+                elif play_button.is_over(mouse_pos):
+                    in_menu = False
+
+                elif music_button.is_over(mouse_pos):
+                    selected_music = 1 if selected_music == 0 else 0
+
+        window.fill(BLACK)
+
+        quit_button.draw(window)
+        play_button.draw(window)
+        music_button.draw(window)
+
+        pygame.display.flip()
+
+background_music = "testmusic2.wav"
+
 def main():
     global player, computer
     pygame.init()
     window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption(WINDOW_CAPTION)
+
+    main_menu(window)
 
     level = 1
 
