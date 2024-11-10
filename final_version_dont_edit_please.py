@@ -668,8 +668,29 @@ class Temperance(Card):
             ##Next turn play 3 cards
             self.played_from.num_cards_to_play_next_turn += self.play_increase_amount
 
+class TheTower(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/the-tower.jpg")
 
-ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice, Temperance]
+        self.damage_amount = 8
+        self.heal_amount = 8
+        self.upright_tooltip = "8 damage to you then 8 damage to the opponent"
+        self.revered_tooltip = "heal both for 8"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##8 damage to you then 8 damage to the opponent
+            self.played_from.health -= self.damage_amount
+            self.played_on.health -= self.damage_amount
+
+        else:
+            ##heal both for 8
+            self.played_from.health += self.heal_amount
+            self.played_on.health += self.heal_amount
+
+
+ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice, Temperance, TheTower]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 player = Player()
