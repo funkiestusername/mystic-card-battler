@@ -648,9 +648,10 @@ class TheDevil(Card):
 
 class TheTower(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/the-tower.jpg.jpg")
+        super().__init__(upright, played_on, played_from, "images/the-tower.jpg")
 
         self.damage_amount = 8
+        self.heal_amount = 8
         self.upright_tooltip = "In 5 turns deal 8 damage to the opponent"
         self.revered_tooltip = "Stop The Tower, and delay any incoming damage to in two turns time"
         self.create_tooltip()
@@ -658,10 +659,13 @@ class TheTower(Card):
     def play(self):
         if self.upright:
             ##In 5 turns deal 8 damage to the opponent
-           pass
+            self.played_from.health -= self.damage_amount
+            self.played_on.health -= self.damage_amount
+
         else:
             ##Stop The Tower, and delay any incoming damage to in two turns time
-            pass
+            self.played_from.health += self.heal_amount
+            self.played_on.health += self.heal_amount
 
 class TheStar(Card):
     def __init__(self, upright, played_on, played_from):
@@ -699,7 +703,7 @@ class TheMoon(Card):
 
 
 
-ALL_ARCANA_CARDS = [TheFool, TheEmpress, TheEmperor,TheChariot]
+ALL_ARCANA_CARDS = [TheFool, TheEmpress, TheEmperor,TheChariot,TheTower]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 def main():

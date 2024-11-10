@@ -100,16 +100,15 @@ remove all healing cards from your deck but double damage (excluding arcana's) f
 
 The Tower:
 Upright:
-In 5 turns deal 8 damage to the opponent
+8 damage to you then 8 damage to the opponent
 Reversed:
-Stop the tower, and delay any incoming damage to in two turns time
-(so two turns of no damage but then on the third it is all dealt)
+heal both for 8
 
 The Star:
 Upright:
 Full Heal
 Reversed:
-For 5 turns opponent heals go to you instead
+next turn when opponent heals
 
 The Moon:
 Upright:
