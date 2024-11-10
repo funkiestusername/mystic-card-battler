@@ -591,9 +591,78 @@ class Justice(Card):
             self.played_on.is_next_card_reversed = True
             pass
 
+class TheHangedMan(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/strength.jpg")
 
 
+        self.upright_tooltip = "Sacrifice health in exchange for dealing damage"
+        self.revered_tooltip = "Skips the opponents turn"
+        self.create_tooltip()
 
+    def play(self):
+        if self.upright:
+            ##Sacrifice health in exchange for dealing (health*1.5) damage rounded down
+            self.damage_amount = int(self.sacrificed_health*1.5)
+            self.played_on.health -= self.damage_amount
+            pass
+        else:
+            ##Skip the opponents turn
+            pass
+
+class Death(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+
+
+        self.upright_tooltip = "Double time limit for the rest of the level"
+        self.revered_tooltip = "Deal 1 damage per turn to the opponent for 5 turns"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Double time limit for the rest of the level
+           pass
+        else:
+            ##Deal 1 damage per turn to the opponent for 5 turns
+
+            pass
+
+class Temperance(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+
+        self.play_increase_amount = 2
+
+        self.upright_tooltip = "Double time limit for the rest of the level"
+        self.revered_tooltip = "Next turn play 3 cards"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Double time limit for the rest of the level
+           pass
+        else:
+            ##Next turn play 3 cards
+            self.played_from.num_cards_to_play_next_turn += self.play_increase_amount
+
+class TheDevil(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+
+
+        self.upright_tooltip = "The opponent has all healing cards removed from deck"
+        self.revered_tooltip = "Remove all healing cards from your deck and double your damage"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##The opponent has all healing cards removed from deck
+
+           pass
+        else:
+            ##remove all healing cards from your deck but double damage (excluding arcana's) for level
+            pass
 ALL_ARCANA_CARDS = [TheFool, TheEmpress, TheEmperor,TheChariot]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
