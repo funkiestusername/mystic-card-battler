@@ -114,6 +114,8 @@ class Competitor:
         self.is_next_card_reversed = False
         self.is_next_card_mirrored = False
         self.is_doing_double_damage = False
+        self.is_healing_doubled = False
+        self.is_healing_halved = False
 
         self.is_computer = False
 
@@ -180,6 +182,8 @@ class Competitor:
         self.is_next_card_reversed = False
         self.is_next_card_mirrored = False
         self.is_doing_double_damage = False
+        self.is_healing_doubled = False
+        self.is_healing_halved = False
 
         self.has_won = False
         self.playing_turn = False
@@ -202,6 +206,12 @@ class Competitor:
             card.heal_amount = card.heal_amount // 2
             card.draw_increase_amount = card.draw_increase_amount // 2
             card.play_increase_amount = card.play_increase_amount // 2
+
+        if self.is_healing_doubled:
+            card.heal_amount *= 2
+
+        if self.is_healing_halved:
+            card.heal_amount //= 2
 
         if self.is_doing_double_damage:
             card.damage_amount *= 2
@@ -486,8 +496,8 @@ class GenericDamage(Card):
         self.damage_amount = 2 if self.upright else 0
         self.heal_amount = 1 if not self.upright else 0
 
-        self.upright_tooltip = f"Deal {self.damage_amount} to opponent"
-        self.revered_tooltip = f"Heal {self.heal_amount} to yourself"
+        self.upright_tooltip = f"Deal 2 to opponent"
+        self.revered_tooltip = f"Heal 1 to yourself"
         self.create_tooltip()
 
     def play(self):
@@ -506,8 +516,8 @@ class GenericHeal(Card):
         self.heal_amount = 2 if self.upright else 0
         self.is_healing = True
 
-        self.upright_tooltip = f"Heal {self.heal_amount} to yourself"
-        self.revered_tooltip = f"Damage {self.damage_amount} to opponent"
+        self.upright_tooltip = f"Heal 2 to yourself"
+        self.revered_tooltip = f"Damage 1 to opponent"
         self.create_tooltip()
 
     def play(self):
@@ -526,7 +536,7 @@ class TheFool(Card):
         self.damage_amount = random.randint(1, 4)
         self.play_increase_amount = 1
 
-        self.upright_tooltip = f"Play {self.play_increase_amount} extra card(s) next turn"
+        self.upright_tooltip = f"Play 1 extra card next turn"
         self.revered_tooltip = f"Deal 1 to 4 damage to opponent, deal 4-X to yourself"
         self.create_tooltip()
 
@@ -545,7 +555,7 @@ class TheMagician(Card):
         super().__init__(upright, played_on, played_from, "images/Magician.jpg")
         self.draw_increase_amount = 1
 
-        self.upright_tooltip = f"Draw {self.draw_increase_amount} extra card(s) next turn"
+        self.upright_tooltip = f"Draw 1 extra card next turn"
         self.revered_tooltip = f"Opponent will be forced to play random cards on next turn"
         self.create_tooltip()
 
@@ -713,6 +723,21 @@ class TheTower(Card):
             self.played_from.health += self.heal_amount
             self.played_on.health += self.heal_amount
 
+class TheSun(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/the-sun.jpg")
+        self.upright_tooltip = "Double healing effectiveness"
+        self.revered_tooltip = "Half opponent  healing effectiveness"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Double healing effectiveness
+            self.played_from.is_healing_doubled = True
+        else:
+            ##Half opponent  healing effectiveness
+            self.played_on.is_healing_halved = True
+
 class TheDevil(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "images/the-devil.jpg")
@@ -745,7 +770,7 @@ class TheDevil(Card):
                 if card.is_healing:
                     self.played_from.hand.remove(card)
 
-ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice, Temperance, TheTower, TheDevil]
+ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice, Temperance, TheTower, TheDevil, TheSun]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 player = Player()
@@ -808,9 +833,9 @@ def play_level(window, level):
         computer.draw(window)
 
         if computer.has_won:
-            draw_text(window, "The computer won.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+            draw_text(window, "The computer won.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100))
         elif player.has_won:
-            draw_text(window, "You won the battle!", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+            draw_text(window, "You won the battle!", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100))
         elif player.ran_out_of_time:
             draw_text(window, "You ran out of time.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100))
 
