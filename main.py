@@ -663,6 +663,25 @@ class TheDevil(Card):
         else:
             ##remove all healing cards from your deck but double damage (excluding arcana's) for level
             pass
+
+class TheTower(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+
+        self.damage_amount = 8
+        self.upright_tooltip = "In 5 turns deal 8 damage to the opponent"
+        self.revered_tooltip = "Stop The Tower, and delay any incoming damage to in two turns time"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##In 5 turns deal 8 damage to the opponent
+           pass
+        else:
+            ##Stop The Tower, and delay any incoming damage to in two turns time
+            pass
+
+
 ALL_ARCANA_CARDS = [TheFool, TheEmpress, TheEmperor,TheChariot]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
