@@ -647,7 +647,7 @@ class TheChariot(Card):
         super().__init__(upright, played_on, played_from, "images/TheChariot.jpg")
         self.is_healing = True
         self.upright_tooltip = "Deal 2 damage to the opponent and heal 2"
-        self.revered_tooltip = "Deal 5 damage to the opponent and half rounded down to use"
+        self.revered_tooltip = "Deal 5 damage to the opponent and 2 to yourself"
         self.create_tooltip()
 
     def play(self):
@@ -867,7 +867,7 @@ class MenuButton:
 
 def main_menu(window):
     music_options = ["alt-rock.wav", "testmusic2.wav"]
-    selected_music = 0
+    selected_music = 1
 
     quit_button = MenuButton(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 + 100, 100, 75, "Quit")
     play_button = MenuButton(WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2, 100, 70, "Play")
