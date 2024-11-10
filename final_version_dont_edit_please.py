@@ -333,13 +333,16 @@ class Player(Competitor):
             self.time_limit_timer += dt
             if self.time_limit_timer >= self.time_limit:
                 # ran out of time
+                self.time_limit_timer = 0
                 self.ran_out_of_time = True
+                self.reset()
+                self.opponent.reset()
 
     def draw(self, surface):
         super().draw(surface)
 
-        bar_length = (self.time_limit_timer / self.time_limit * 100) * 5
-        pygame.draw.rect(surface, BLUE, (0, 0, bar_length, 50))
+        bar_length = 900 - (self.time_limit_timer / self.time_limit * 100) * 9
+        pygame.draw.rect(surface, BLUE, (0, WINDOW_HEIGHT // 2 + 40, bar_length, 50))
 
     def handle_mouse_click(self, mouse_pos):
         # saves having all the clicky logic in the main function, plus player is only thing that takes clicky input
@@ -809,7 +812,7 @@ def play_level(window, level):
         elif player.has_won:
             draw_text(window, "You won the battle!", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
         elif player.ran_out_of_time:
-            draw_text(window, "You ran out of time.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+            draw_text(window, "You ran out of time.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2 - 100))
 
         # draw level number
         draw_text(window, f"Level: {level}", ORANGE, 64, left_centre=(0, WINDOW_HEIGHT // 2))
