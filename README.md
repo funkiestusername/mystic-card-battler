@@ -9,10 +9,11 @@ A simple card game using Tarot card. Built in ~2 days for the itch.io mini jam.
 ## How To Run
 1. Make sure Python >=3.11 is installed (earlier versions may work but are not tested)
 2. `cd` into the directory that contains `main.py`
-3. Create a virtual environment: `python -m venv ./venv`
-4. Activate it: `source ./venv/bin/activate` on Linux, or `./venv/bin/activate.bat` on Windows
-5. Install the dependencies: `pip install -r requirements.txt`
-6. Run the game! `python main.py`
+3. Install pygame: `pip install pygame` and skip to step 7. Or, create a virtual environment to avoid global installation of pygame
+4. Create a virtual environment: `python -m venv ./venv`
+5. Activate it: `source ./venv/bin/activate` on Linux, or `./venv/bin/activate.bat` on Windows
+6. Install the dependencies: `pip install -r requirements.txt`
+7. Run the game! `python main.py`
 
 ## How To Play
 - Each turn you draw a card, and play card.
