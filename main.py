@@ -95,7 +95,7 @@ class Competitor:
         self.is_next_card_halved = False
         self.is_next_card_blocked = False
 
-        self.hide_cards_in_hand = False
+        self.is_computer = False
 
         self.has_won = False
         self.playing_turn = False
@@ -186,9 +186,8 @@ class Competitor:
 
         # draw the hand
         for i in range(len(self.hand)):
-            if not self.hide_cards_in_hand:
-                card = self.hand[i]
-
+            card = self.hand[i]
+            if not self.is_computer:
                 card.rect.left = self.deck_rect.right + i * card.rect.width + 10 * (i + 1)
                 card.rect.y = self.deck_rect.y
 
@@ -196,15 +195,21 @@ class Competitor:
 
                 if card.rect.collidepoint(mouse_pos) and self.playing_turn and self.num_cards_to_play_this_turn > 0:
                     pygame.draw.rect(surface, RED, card.rect, width=3)
-            else:
-                rect = pygame.Rect(0, self.deck_rect.y, self.deck_rect.width, self.deck_rect.height)
-                rect.right = self.deck_rect.left - i * self.deck_rect.width - 10 * (i + 1)
-                surface.blit(self.deck_image, rect)
+            elif self.is_computer:
+                if card.is_hidden:
+                    rect = pygame.Rect(0, self.deck_rect.y, self.deck_rect.width, self.deck_rect.height)
+                    rect.right = self.deck_rect.left - i * self.deck_rect.width - 10 * (i + 1)
+                    surface.blit(self.deck_image, rect)
+                else:
+                    rect = pygame.Rect(0, self.deck_rect.y, self.deck_rect.width, self.deck_rect.height)
+                    rect.right = self.deck_rect.left - i * self.deck_rect.width - 10 * (i + 1)
+                    surface.blit(card.image, rect)
 
-        for card in self.hand:
-            # render a tooltip for the card
-            if card.rect.collidepoint(mouse_pos) and not self.hide_cards_in_hand:
-                card.tooltip.draw(surface, mouse_pos)
+        if not self.is_computer:
+            for card in self.hand:
+                # render a tooltip for the card
+                if card.rect.collidepoint(mouse_pos):
+                    card.tooltip.draw(surface, mouse_pos)
 
         # draw the health and lives
         for i in range(self.health):
@@ -237,35 +242,42 @@ class Computer(Competitor):
     def __init__(self):
         super().__init__()
         self.move_timer = 0
+        self.revealed_cards = 0
+        self.card_to_play = None
 
         self.deck_rect.topright = (WINDOW_WIDTH - 20, 20)
         self.deck_card_count_y_offset = 125
-        self.hide_cards_in_hand = True
+        self.is_computer = True
         self.health_icon_rect.bottom = 300
 
     def have_turn(self, dt):
         # computer turn logic
         # will sleep briefly between moves so player can process what they're doing
 
-        # general algorithm (in no particular order
+        # general algorithm (in no particular order)
         # draw a card
         # if a card dealing more damage than player has health, play it
         # if self health less than a threshold, heal if available
         # if at max health, try not to play healing card
 
+        # currently plays randomly
         self.move_timer += dt
         if self.move_timer >= 0.5:
             self.move_timer = 0
 
-            # currently just plays a random card
-            for i in range(self.num_cards_to_draw_this_turn):
+            if self.num_cards_to_draw_this_turn > 0:
                 self.draw_card()
                 return
 
-            for i in range(self.num_cards_to_play_this_turn):
-                self.play_card(random.choice(self.hand))
-                return
-
+            if self.revealed_cards == 1:
+                self.revealed_cards = 0
+                self.play_card(self.card_to_play)
+            else:
+                if self.num_cards_to_play_this_turn > 0:
+                    card = random.choice(self.hand)
+                    card.is_hidden = False
+                    self.card_to_play = card
+                    self.revealed_cards = 1
 
 class Card:
     def __init__(self, upright, played_on, played_from, image_file):
@@ -287,6 +299,7 @@ class Card:
         self.upright_tooltip = ""
         self.revered_tooltip = ""
         self.tooltip = None
+        self.is_hidden = True
 
     def create_tooltip(self):
         self.tooltip = Tooltip(self.upright_tooltip, self.revered_tooltip, self.upright)
@@ -446,6 +459,7 @@ def main():
     running = True
     while running:
         dt = fps_clock.tick(60) / 1000
+        game_over = player.has_won or computer.has_won
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -453,10 +467,10 @@ def main():
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_LEFT:
-                    if player.playing_turn:
+                    if player.playing_turn and not game_over:
                         player.handle_mouse_click(pygame.mouse.get_pos())
 
-        if not player.has_won and not computer.has_won:
+        if not game_over:
             computer.update()
             player.update()
 
@@ -471,7 +485,7 @@ def main():
         if player.has_won:
             draw_text(window, "You won the battle!", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
         elif computer.has_won:
-            draw_text(window, "Tough luck, the computer won.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+            draw_text(window, "The computer won.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
 
         pygame.display.flip()
 
