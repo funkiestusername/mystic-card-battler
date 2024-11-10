@@ -95,6 +95,7 @@ class Competitor:
         self.is_next_card_halved = False
         self.is_next_card_doubled = False
         self.is_next_card_blocked = False
+        self.is_next_card_reversed = False
 
         self.is_computer = False
 
@@ -512,6 +513,84 @@ class Strength(Card):
         else:
             ##Decreases all damage from opponent by 1 for 3 turns
             pass
+
+
+class Strength(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+
+
+        self.upright_tooltip = "Increases all damage by 1 for 3 turns"
+        self.revered_tooltip = "Decreases all damage from opponent by 1 for 3 turns"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Increases all damage by 1 for 3 turns
+
+            pass
+        else:
+            ##Decreases all damage from opponent by 1 for 3 turns
+            pass
+
+
+class TheHermit(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+
+
+        self.upright_tooltip = "See the next three cards in your deck, in order they will be drawn"
+        self.revered_tooltip = "No cards can effect you on the next turn, and you cannot play any cards"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##see the next three cards in your deck, in order they will be drawn
+
+            pass
+        else:
+            ##Decreases all damage from opponent by 1 for 3 turns
+            pass
+
+
+class TheWheelOfFortune(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+
+
+        self.upright_tooltip = "See the next three cards in your deck, in order they will be drawn"
+        self.revered_tooltip = "Decreases all damage from opponent by 1 for 3 turns"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##See the next three cards in your deck, in order they will be drawn
+
+            pass
+        else:
+            ##Decreases all damage from opponent by 1 for 3 turns
+            pass
+
+class Justice(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+
+
+        self.upright_tooltip = "See the next three cards in your deck, in order they will be drawn"
+        self.revered_tooltip = "Decreases all damage from opponent by 1 for 3 turns"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Mirror the card the opponent plays:
+            ##.i.e damage opponent if they damage you or heal if they heal themselves
+
+            pass
+        else:
+            ##reverse the target of the opponents card
+            self.played_on.is_next_card_reversed = True
+            pass
+
 
 
 
