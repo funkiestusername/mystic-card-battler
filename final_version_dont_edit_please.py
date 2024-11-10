@@ -761,10 +761,10 @@ class TheDevil(Card):
             ##remove all healing cards from your deck but double damage (excluding arcana's) for level
             self.played_from.is_doing_double_damage = True
 
-            for card_class in self.played_on.deck.copy():
+            for card_class in self.played_from.deck.copy():
                 card = card_class(True, None, None)
                 if card.is_healing:
-                    self.played_on.deck.remove(card_class)
+                    self.played_from.deck.remove(card_class)
 
             for card in self.played_from.hand.copy():
                 if card.is_healing:
