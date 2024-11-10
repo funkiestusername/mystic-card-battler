@@ -912,8 +912,6 @@ background_music = "testmusic2.wav"
 
 def main():
     global player, computer
-
-
     main_menu(window)
 
     bg_music = pygame.mixer.Sound(background_music)
@@ -945,6 +943,7 @@ def main():
             player.opponent = computer
             computer.opponent = player
             level += 1
+            player.time_limit -= level / 5
 
     pygame.quit()
     sys.exit()
