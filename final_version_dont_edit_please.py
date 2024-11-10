@@ -647,8 +647,29 @@ class Justice(Card):
             self.played_on.is_next_card_reversed = True
             pass
 
+class Temperance(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/temperance.jpg")
 
-ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice]
+        self.play_increase_amount = 2
+
+        self.upright_tooltip = "Double time limit for the rest of the level"
+        self.revered_tooltip = "Next turn play 3 cards"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+           ##Double time limit for the rest of the level
+           if not self.played_on.is_computer:
+               self.played_on.time_limit *= 2
+           elif not self.played_from.is_computer:
+               self.played_from.time_limit *= 2
+        else:
+            ##Next turn play 3 cards
+            self.played_from.num_cards_to_play_next_turn += self.play_increase_amount
+
+
+ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice, Temperance]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 player = Player()
