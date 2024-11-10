@@ -689,15 +689,14 @@ def main():
     pygame.init()
     window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption(WINDOW_CAPTION)
-
     player = Player()
     computer = Computer()
     player.opponent = computer
     computer.opponent = player
-
     player.init_hand()
     computer.init_hand()
-
+    background = pygame.image.load("images/background.png").convert_alpha()
+    background = pygame.transform.scale(background, (900, 900))
     player.start_turn()
 
     fps_clock = pygame.time.Clock()
@@ -722,8 +721,7 @@ def main():
             if computer.playing_turn:
                 computer.have_turn(dt)
 
-        window.fill(BLACK)
-
+        window.blit(background, (0, 0))
         player.draw(window)
         computer.draw(window)
 
