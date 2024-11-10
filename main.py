@@ -681,6 +681,41 @@ class TheTower(Card):
             ##Stop The Tower, and delay any incoming damage to in two turns time
             pass
 
+class TheStar(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/the-star.jpg")
+
+        self.heal_amount = MAX_HEALTH-self.played_from.health
+        self.upright_tooltip = "Full Heal"
+        self.revered_tooltip = "Stop The Tower, and delay any incoming damage to in two turns time"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Full Heal
+            self.played_from.health += self.heal_amount
+        else:
+            ##For 5 turns opponent heals go to you instead
+
+            pass
+
+class TheMoon(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/the-moon.jpg")
+
+        self.upright_tooltip = "Learn what arcana's the opponent has"
+        self.revered_tooltip = "Stop The Tower, and delay any incoming damage to in two turns time"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##In 5 turns deal 8 damage to the opponent
+           pass
+        else:
+            ##The opponent now doesn't know their health or how much damage they are taking
+            pass
+
+
 
 ALL_ARCANA_CARDS = [TheFool, TheEmpress, TheEmperor,TheChariot]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
