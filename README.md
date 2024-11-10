@@ -1,7 +1,9 @@
 # Mystic Tarot Card Battler Game
 
 **DISCLAIMER**: This game was built by two people who haven't the faintest idea of what's going on. If you're expecting a nice, good looking game, prepare to be disappointed.
+
 **BETTER DISCLAIMER**: This game is awesome don't listen to the last one.
+
 A simple card game using Tarot card. Built in ~2 days for the itch.io mini jam.
 
 ## How To Run

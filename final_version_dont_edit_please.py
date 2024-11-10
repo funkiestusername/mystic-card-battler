@@ -273,7 +273,8 @@ class Competitor:
                 rect.right = self.health_icon_rect.right - i * self.health_icon_rect.width
                 surface.blit(self.health_icon_image, rect)
 
-        draw_text(surface, f"Lives: {self.lives}", TURQUOISE, 48, right_centre=(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + 120))
+        if not self.is_computer:
+            draw_text(surface, f"Lives: {self.lives}", TURQUOISE, 48, right_centre=(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + 120))
 
 class Player(Competitor):
     def __init__(self):
