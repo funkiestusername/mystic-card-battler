@@ -111,6 +111,8 @@ class Competitor:
         self.is_next_card_forced = False
         self.is_next_card_halved = False
         self.is_next_card_blocked = False
+        self.is_next_card_reversed = False
+        self.is_next_card_mirrored = False
 
         self.is_computer = False
 
@@ -174,11 +176,24 @@ class Competitor:
         self.is_next_card_forced = False
         self.is_next_card_halved = False
         self.is_next_card_blocked = False
+        self.is_next_card_reversed = False
+        self.is_next_card_mirrored = False
 
         self.has_won = False
         self.playing_turn = False
 
     def play_card(self, card):
+        if self.is_next_card_reversed:
+            self.is_next_card_reversed = False
+            card.played_from = self.opponent
+            card.played_on = self
+
+        if self.is_next_card_mirrored:
+            self.is_next_card_mirrored = False
+            card.play()
+            card.played_from = self.opponent
+            card.played_on = self
+
         if self.is_next_card_halved:
             self.is_next_card_halved = False
             card.damage_amount = card.damage_amount // 2
@@ -601,8 +616,26 @@ class TheChariot(Card):
             self.played_on.health -= self.damage_amount
             self.played_from.health -= int(self.damage_amount/2)
 
+class Justice(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/justice.jpg")
 
-ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers]
+        self.upright_tooltip = "Mirror the card played by opponent"
+        self.revered_tooltip = "Reverse the target of opponents next card"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Mirror the card the opponent plays:
+            ##.i.e damage opponent if they damage you or heal if they heal themselves
+            self.played_on.is_next_card_mirrored = True
+        else:
+            ##reverse the target of the opponents card
+            self.played_on.is_next_card_reversed = True
+            pass
+
+
+ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 player = Player()
