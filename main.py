@@ -93,6 +93,7 @@ class Competitor:
 
         self.is_next_card_forced = False
         self.is_next_card_halved = False
+        self.is_next_card_doubled = False
         self.is_next_card_blocked = False
 
         self.is_computer = False
@@ -436,6 +437,83 @@ class TheEmperor(Card):
             ##deal between 1 and 4 damage to the opponent, same to yourself
             self.played_on.health -= self.damage_amount
             self.played_from.health -= self.damage_amount
+
+class TheHierophant(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/the-emperor.jpg")
+
+
+        self.upright_tooltip = "Double's the effectiveness of the next card played"
+        self.revered_tooltip = "Doubles the negative effects cards played by opponent"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Double's the effectiveness of the next card played
+            self.played_from.is_next_card_doubled = True
+            pass
+        else:
+            ##Doubles the negative effects cards played by opponent
+            pass
+
+class TheLovers(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/the-emperor.jpg")
+
+
+        self.upright_tooltip = "Play the next card the opponent play"
+        self.revered_tooltip = "Shuffle both you and your opponents decks"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Play the next card the opponent play
+            pass
+        else:
+            ##Shuffle both you and your opponents decks
+            pass
+
+class TheChariot(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/the-emperor.jpg")
+
+
+        self.upright_tooltip = "Deal 2 damage to the opponent and heal 2"
+        self.revered_tooltip = "Deal 5 damage to the opponent and half rounded down to use"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Deal 2 damage to the opponent and add 2 health
+            self.damage_amount = 2
+            self.heal_amount = 2
+            self.played_on.health -= self.damage_amount
+            self.played_from.health += self.heal_amount
+        else:
+            ##Deal 5 damage to the opponent and half rounded down to use
+            self.damage_amount = 5
+            self.played_on.health -= self.damage_amount
+            self.played_from.health -= int(self.damage_amount/2)
+
+class Strength(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/the-emperor.jpg")
+
+
+        self.upright_tooltip = "Increases all damage by 1 for 3 turns"
+        self.revered_tooltip = "Decreases all damage from opponent by 1 for 3 turns"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##Increases all damage by 1 for 3 turns
+
+            pass
+        else:
+            ##Decreases all damage from opponent by 1 for 3 turns
+            pass
+
+
 
 ALL_ARCANA_CARDS = [TheFool, TheEmpress, TheEmperor]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
