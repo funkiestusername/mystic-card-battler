@@ -76,7 +76,9 @@ class Competitor:
         self.max_health = MAX_HEALTH
         self.health = self.max_health
         self.health_icon_image = pygame.image.load("images/heart.png")
+        self.emptyhealth_icon_image = pygame.image.load("images/empty-heart.png")
         self.health_icon_image = pygame.transform.scale(self.health_icon_image, (39, 36))
+        self.emptyhealth_icon_image = pygame.transform.scale(self.emptyhealth_icon_image, (39, 36))
         self.health_icon_rect = self.health_icon_image.get_rect()
 
         self.opponent = None
