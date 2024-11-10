@@ -515,7 +515,7 @@ class Strength(Card):
 
 
 
-ALL_ARCANA_CARDS = [TheFool, TheEmpress, TheEmperor]
+ALL_ARCANA_CARDS = [TheFool, TheEmpress, TheEmperor,TheChariot]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 def main():
