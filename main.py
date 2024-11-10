@@ -514,29 +514,9 @@ class Strength(Card):
             ##Decreases all damage from opponent by 1 for 3 turns
             pass
 
-
-class Strength(Card):
-    def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/strength.jpg")
-
-
-        self.upright_tooltip = "Increases all damage by 1 for 3 turns"
-        self.revered_tooltip = "Decreases all damage from opponent by 1 for 3 turns"
-        self.create_tooltip()
-
-    def play(self):
-        if self.upright:
-            ##Increases all damage by 1 for 3 turns
-
-            pass
-        else:
-            ##Decreases all damage from opponent by 1 for 3 turns
-            pass
-
-
 class TheHermit(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+        super().__init__(upright, played_on, played_from, "images/the-hermit.jpg.jpg")
 
 
         self.upright_tooltip = "See the next three cards in your deck, in order they will be drawn"
@@ -555,7 +535,7 @@ class TheHermit(Card):
 
 class TheWheelOfFortune(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+        super().__init__(upright, played_on, played_from, "images/the-wheel-of-fortune.jpg.jpg")
 
 
         self.upright_tooltip = "See the next three cards in your deck, in order they will be drawn"
@@ -573,7 +553,7 @@ class TheWheelOfFortune(Card):
 
 class Justice(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+        super().__init__(upright, played_on, played_from, "images/justice.jpg.jpg")
 
 
         self.upright_tooltip = "See the next three cards in your deck, in order they will be drawn"
@@ -593,7 +573,7 @@ class Justice(Card):
 
 class TheHangedMan(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+        super().__init__(upright, played_on, played_from, "images/the-hanged-man.jpg.jpg")
 
 
         self.upright_tooltip = "Sacrifice health in exchange for dealing damage"
@@ -612,7 +592,7 @@ class TheHangedMan(Card):
 
 class Death(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+        super().__init__(upright, played_on, played_from, "images/death.jpg")
 
 
         self.upright_tooltip = "Double time limit for the rest of the level"
@@ -630,7 +610,7 @@ class Death(Card):
 
 class Temperance(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+        super().__init__(upright, played_on, played_from, "images/temperance.jpg.jpg")
 
         self.play_increase_amount = 2
 
@@ -648,7 +628,7 @@ class Temperance(Card):
 
 class TheDevil(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+        super().__init__(upright, played_on, played_from, "images/the-devil.jpg.jpg")
 
 
         self.upright_tooltip = "The opponent has all healing cards removed from deck"
@@ -666,7 +646,7 @@ class TheDevil(Card):
 
 class TheTower(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/strength.jpg")
+        super().__init__(upright, played_on, played_from, "images/the-tower.jpg.jpg")
 
         self.damage_amount = 8
         self.upright_tooltip = "In 5 turns deal 8 damage to the opponent"
