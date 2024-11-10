@@ -435,7 +435,7 @@ class Computer(Competitor):
                         best_damage_card = self.hand[0]
                         found_best_damage = False
                         for card in self.hand.copy():
-                            if card.damage_amount > best_damage_card:
+                            if card.damage_amount > best_damage_card.damage_amount:
                                 if card.damage_amount < self.health or not card.does_damage_to_yourself:
                                     best_damage_card = card
                                     found_best_damage = True
