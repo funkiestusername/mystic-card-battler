@@ -656,9 +656,16 @@ computer = Computer()
 player.opponent = computer
 computer.opponent = player
 
+pygame.init()
+pygame.mixer.init()
+window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption(WINDOW_CAPTION)
+
+background = pygame.image.load("images/background.png").convert_alpha()
+background = pygame.transform.scale(background, (900, 900))
+
 def play_level(window, level):
-    background = pygame.image.load("images/background.png").convert_alpha()
-    background = pygame.transform.scale(background, (900, 900))
+
 
     player.reset()
     computer.reset()
@@ -728,10 +735,10 @@ class MenuButton:
         self.text = text
 
     def draw(self, surface):
-        draw_text(surface, self.text, WHITE, 64, centre=self.rect.center)
+        draw_text(surface, self.text, BLACK, 64, centre=self.rect.center)
 
         if self.is_over(pygame.mouse.get_pos()):
-            pygame.draw.rect(surface, YELLOW, self.rect, width=3)
+            pygame.draw.rect(surface, BLUE, self.rect, width=3)
 
     def is_over(self, pos):
         return self.rect.left < pos[0] < self.rect.right and self.rect.top < pos[1] < self.rect.bottom
@@ -771,6 +778,8 @@ def main_menu(window):
 
         window.fill(BLACK)
 
+        window.blit(background, (0, 0))
+
         quit_button.draw(window)
         play_button.draw(window)
         music_button.draw(window)
@@ -781,10 +790,7 @@ background_music = "testmusic2.wav"
 
 def main():
     global player, computer
-    pygame.init()
-    pygame.mixer.init()
-    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption(WINDOW_CAPTION)
+
 
     main_menu(window)
 
