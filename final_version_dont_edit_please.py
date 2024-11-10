@@ -647,8 +647,29 @@ class Justice(Card):
             self.played_on.is_next_card_reversed = True
             pass
 
+class Temperance(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/temperance.jpg")
 
-ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice]
+        self.play_increase_amount = 2
+
+        self.upright_tooltip = "Double time limit for the rest of the level"
+        self.revered_tooltip = "Next turn play 3 cards"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+           ##Double time limit for the rest of the level
+           if not self.played_on.is_computer:
+               self.played_on.time_limit *= 2
+           elif not self.played_from.is_computer:
+               self.played_from.time_limit *= 2
+        else:
+            ##Next turn play 3 cards
+            self.played_from.num_cards_to_play_next_turn += self.play_increase_amount
+
+
+ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice, Temperance]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 player = Player()
@@ -656,9 +677,16 @@ computer = Computer()
 player.opponent = computer
 computer.opponent = player
 
+pygame.init()
+pygame.mixer.init()
+window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+pygame.display.set_caption(WINDOW_CAPTION)
+
+background = pygame.image.load("images/background.png").convert_alpha()
+background = pygame.transform.scale(background, (900, 900))
+
 def play_level(window, level):
-    background = pygame.image.load("images/background.png").convert_alpha()
-    background = pygame.transform.scale(background, (900, 900))
+
 
     player.reset()
     computer.reset()
@@ -728,10 +756,10 @@ class MenuButton:
         self.text = text
 
     def draw(self, surface):
-        draw_text(surface, self.text, WHITE, 64, centre=self.rect.center)
+        draw_text(surface, self.text, BLACK, 64, centre=self.rect.center)
 
         if self.is_over(pygame.mouse.get_pos()):
-            pygame.draw.rect(surface, YELLOW, self.rect, width=3)
+            pygame.draw.rect(surface, BLUE, self.rect, width=3)
 
     def is_over(self, pos):
         return self.rect.left < pos[0] < self.rect.right and self.rect.top < pos[1] < self.rect.bottom
@@ -771,6 +799,8 @@ def main_menu(window):
 
         window.fill(BLACK)
 
+        window.blit(background, (0, 0))
+
         quit_button.draw(window)
         play_button.draw(window)
         music_button.draw(window)
@@ -781,10 +811,7 @@ background_music = "testmusic2.wav"
 
 def main():
     global player, computer
-    pygame.init()
-    pygame.mixer.init()
-    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption(WINDOW_CAPTION)
+
 
     main_menu(window)
 
