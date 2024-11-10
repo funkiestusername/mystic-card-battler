@@ -117,6 +117,7 @@ class Competitor:
         self.init_deck()
 
     def init_deck(self):
+        self.deck.clear()
         for i in range(MAX_ARCANA):
             self.deck.append(random.choice(ALL_ARCANA_CARDS))
 
@@ -126,6 +127,7 @@ class Competitor:
         random.shuffle(self.deck)
 
     def init_hand(self):
+        self.hand.clear()
         # give 5 starting cards from the deck to start off with
         for i in range(STARTING_HAND_CARD_COUNT):
             self.draw_card()
@@ -243,11 +245,6 @@ class Competitor:
         else:
             draw_text(surface, f"Lives: {self.lives}", TURQUOISE, 48, right_centre=(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + 120))
 
-        if not self.is_computer:
-            # draw the time limit bar
-            # pygame.draw.rect(surface, GREEN, (0, 0, ))
-            pass
-
 class Player(Competitor):
     def __init__(self):
         super().__init__()
@@ -275,6 +272,12 @@ class Player(Competitor):
             if self.time_limit_timer >= self.time_limit:
                 # ran out of time
                 self.ran_out_of_time = True
+
+    def draw(self, surface):
+        super().draw(surface)
+
+        bar_length = (self.time_limit_timer / self.time_limit * 100) * 5
+        pygame.draw.rect(surface, BLUE, (0, 0, bar_length, 50))
 
     def handle_mouse_click(self, mouse_pos):
         # saves having all the clicky logic in the main function, plus player is only thing that takes clicky input
@@ -554,15 +557,12 @@ class TheChariot(Card):
 ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
-def play_level(window, level):
+def play_level(window, player, computer, level):
     background = pygame.image.load("images/background.png").convert_alpha()
     background = pygame.transform.scale(background, (900, 900))
 
-    player = Player()
-    computer = Computer()
-    player.opponent = computer
-    computer.opponent = player
-
+    player.init_deck()
+    computer.init_deck()
     player.init_hand()
     computer.init_hand()
 
@@ -615,10 +615,10 @@ def play_level(window, level):
 
         if player.has_won:
             time.sleep(3)
-            return (True, player)
+            return True
         elif computer.has_won or player.ran_out_of_time:
             time.sleep(3)
-            return (False, player)
+            return False
 
 def main():
     pygame.init()
@@ -627,17 +627,29 @@ def main():
 
     level = 1
 
+    player = Player()
+    computer = Computer()
+    player.opponent = computer
+    computer.opponent = player
+
     running = True
     while running:
-        beat_level, player = play_level(window, level)
+        beat_level = play_level(window, player, computer, level)
 
         if not beat_level:
-            # lose a life
             player.lives -= 1
+            tmp = player.lives
+            player = Player()
+            player.lives = tmp
             if player.lives < 0:
-                # restart
                 level = 1
+                player = Player()
+                computer = Computer()
         else:
+            tmp = player.lives
+            player = Player()
+            player.lives = tmp
+            computer = Computer()
             level += 1
 
     pygame.quit()
