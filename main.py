@@ -369,7 +369,7 @@ class TheFool(Card):
 
 class TheMagician(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "")
+        super().__init__(upright, played_on, played_from, "images/Magician.jpg")
         self.draw_increase_amount = 1
 
         self.upright_tooltip = f"Draw {self.draw_increase_amount} extra card(s) next turn"
@@ -386,7 +386,7 @@ class TheMagician(Card):
 
 class TheHighPriestess(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "")
+        super().__init__(upright, played_on, played_from, "images/the-high-priestess.jpg")
         self.create_tooltip()
 
     def play(self):
