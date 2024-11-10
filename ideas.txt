@@ -1,29 +1,29 @@
 Cards:
-The Fool:
+The Fool: dddddddddooooooooooonnnnnnnnnneeeeeeeeeee
 Upright:
 Play two cards on the Users next turn
 Reversed:
 deal between 1 and 4 damage to the opponent, deals 4-X to the user
 
-The Magician:
+The Magician: dddddddddooooooooooonnnnnnnnnneeeeeeeeeee
 Upright:
 Draw 1 more card next turn
 Reversed:
 Disguises the next card played as another random, excluding Reversed Magician
 
-The High Priestess:
+The High Priestess: dddddddddooooooooooonnnnnnnnnneeeeeeeeeee
 Upright:
 Read and mark 1 card of the opponent
 Reversed:
 Swap a card with the opponent
 
-The Empress:
+The Empress: dddddddddooooooooooonnnnnnnnnneeeeeeeeeee
 Upright:
 Increase health by two
 Reversed:
 half the effectiveness of the next card played by an opponent, rounded down
 
-The Emperor:
+The Emperor: dddddddddooooooooooonnnnnnnnnneeeeeeeeeee
 Upright:
 Block the opponents next damaging card
 Reversed:
@@ -41,7 +41,7 @@ Play the next card the opponent plays
 Reversed:
 Shuffle both you and your opponents decks
 
-The Chariot:
+The Chariot: dddddddddooooooooooonnnnnnnnnneeeeeeeeeee
 Upright:
 deal 2 damage to the opponent and add 2 health
 Reversed:

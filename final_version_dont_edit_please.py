@@ -1,4 +1,6 @@
-import pygame, sys, random
+from unittest.mock import right
+
+import pygame, sys, random, time
 
 # colours
 BLACK = (0, 0, 0)
@@ -6,9 +8,10 @@ WHITE = (255, 255, 255)
 RED = (255, 0, 0)
 GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
-YELLOW = (0, 255, 255)
+YELLOW = (255, 255, 0)
 MAGENTA = (255, 0, 255)
-TURQUOISE = (255, 255, 0)
+TURQUOISE = (0, 255, 255)
+ORANGE = (255, 150, 0)
 
 # window settings
 WINDOW_WIDTH = 900
@@ -16,10 +19,17 @@ WINDOW_HEIGHT = 900
 WINDOW_CAPTION = "Mystic Tarot Card Game Battler Thingmy"
 
 
-def draw_text(surface, text, colour, size, centre) -> pygame.Rect:
+def draw_text(surface, text, colour, size, centre=None, left_centre=None, right_centre=None) -> pygame.Rect:
     font = pygame.font.Font("freesansbold.ttf", size)
     text_surface = font.render(text, True, colour)
-    text_rect = text_surface.get_rect(center=centre)
+    text_rect = text_surface.get_rect()
+    if centre is not None:
+        text_rect.center = centre
+    elif left_centre is not None:
+        text_rect.left = left_centre[0]
+        text_rect.centery = left_centre[1]
+    elif right_centre is not None:
+        text_rect.midright = right_centre
     surface.blit(text_surface, text_rect)
     return text_rect
 
@@ -74,6 +84,8 @@ class Competitor:
     def __init__(self):
         self.deck = []
         self.hand = []
+
+        self.lives = 3
 
         self.max_health = MAX_HEALTH
         self.health = self.max_health
@@ -140,6 +152,13 @@ class Competitor:
         self.deck = self.deck[1:]
 
     def play_card(self, card):
+        if self.is_next_card_halved:
+            self.is_next_card_halved = False
+            card.damage_amount = card.damage_amount // 2
+            card.heal_amount = card.heal_amount // 2
+            card.draw_increase_amount = card.draw_increase_amount // 2
+            card.play_increase_amount = card.play_increase_amount // 2
+
         self.num_cards_to_play_this_turn -= 1
         self.hand.remove(card)
         self.deck.append(type(card))  # recycle card
@@ -210,11 +229,24 @@ class Competitor:
 
         # draw the health and lives
         for i in range(self.health):
-            # print(self.health)
-            rect = pygame.Rect(0, self.health_icon_rect.y, self.health_icon_rect.width, self.health_icon_rect.height)
-            rect.left = self.health_icon_rect.left + i * self.health_icon_rect.width
-            surface.blit(self.health_icon_image, rect)
+            if self.is_computer:
+                rect = pygame.Rect(0, self.health_icon_rect.y, self.health_icon_rect.width, self.health_icon_rect.height)
+                rect.left = self.health_icon_rect.left + i * self.health_icon_rect.width
+                surface.blit(self.health_icon_image, rect)
+            else:
+                rect = pygame.Rect(0, self.health_icon_rect.y, self.health_icon_rect.width, self.health_icon_rect.height)
+                rect.right = self.health_icon_rect.right - i * self.health_icon_rect.width
+                surface.blit(self.health_icon_image, rect)
 
+        if self.is_computer:
+            draw_text(surface, f"Lives: {self.lives}", TURQUOISE, 48, left_centre=(0, WINDOW_HEIGHT // 2 - 120))
+        else:
+            draw_text(surface, f"Lives: {self.lives}", TURQUOISE, 48, right_centre=(WINDOW_WIDTH, WINDOW_HEIGHT // 2 + 120))
+
+        if not self.is_computer:
+            # draw the time limit bar
+            # pygame.draw.rect(surface, GREEN, (0, 0, ))
+            pass
 
 class Player(Competitor):
     def __init__(self):
@@ -222,8 +254,27 @@ class Player(Competitor):
         self.deck_rect.bottomleft = (20, WINDOW_HEIGHT - 20)
         self.deck_card_count_y_offset = -125
         self.health_icon_rect.top = WINDOW_HEIGHT - 300
+        self.health_icon_rect.right = WINDOW_WIDTH
 
         self.forced_card_timer = 0
+
+        self.time_limit = 10
+        self.time_limit_timer = 0
+        self.ran_out_of_time = False
+
+    def start_turn(self):
+        super().start_turn()
+
+        self.time_limit_timer = 0
+
+    def update(self, dt):
+        super().update()
+
+        if self.playing_turn:
+            self.time_limit_timer += dt
+            if self.time_limit_timer >= self.time_limit:
+                # ran out of time
+                self.ran_out_of_time = True
 
     def handle_mouse_click(self, mouse_pos):
         # saves having all the clicky logic in the main function, plus player is only thing that takes clicky input
@@ -423,17 +474,18 @@ class TheMagician(Card):
 
 class TheHighPriestess(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "")
+        super().__init__(upright, played_on, played_from, "images/the-high-priestess.jpg")
+        self.upright_tooltip = "View 1 of the opponents cards"
+        self.revered_tooltip = "Swap a random card with opponent"
         self.create_tooltip()
 
     def play(self):
         if self.upright:
             ##Read and mark 1 card of the opponent
             card_to_mark = random.choice(self.played_on.hand)
-            card_to_mark.is_marked = True
+            card_to_mark.is_hidden = False
         else:
             ##Swap a card with the opponent
-            self.played_from.hand.remove(self)  # so this card doesn't get chosen to swap
             opponent_card_index = random.randint(0, len(self.played_on.hand) - 1)
             own_card_index = random.randint(0, len(self.played_from.hand) - 1)
 
@@ -499,13 +551,12 @@ class TheChariot(Card):
             self.played_from.health -= int(self.damage_amount/2)
 
 
-ALL_ARCANA_CARDS = [TheFool, TheEmperor, TheEmpress, TheMagician, TheChariot]
+ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
-def main():
-    pygame.init()
-    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    pygame.display.set_caption(WINDOW_CAPTION)
+def play_level(window, level):
+    background = pygame.image.load("images/background.png").convert_alpha()
+    background = pygame.transform.scale(background, (900, 900))
 
     player = Player()
     computer = Computer()
@@ -518,14 +569,15 @@ def main():
     player.start_turn()
 
     fps_clock = pygame.time.Clock()
-    running = True
-    while running:
+    playing = True
+    while playing:
         dt = fps_clock.tick(60) / 1000
-        game_over = player.has_won or computer.has_won
+        game_over = player.has_won or computer.has_won or player.ran_out_of_time
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                pygame.quit()
+                sys.exit()
 
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == pygame.BUTTON_LEFT:
@@ -534,7 +586,7 @@ def main():
 
         if not game_over:
             computer.update()
-            player.update()
+            player.update(dt)
 
             if computer.playing_turn:
                 computer.have_turn(dt)
@@ -544,6 +596,8 @@ def main():
 
         window.fill(BLACK)
 
+        window.blit(background, (0, 0))
+
         player.draw(window)
         computer.draw(window)
 
@@ -551,11 +605,43 @@ def main():
             draw_text(window, "You won the battle!", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
         elif computer.has_won:
             draw_text(window, "The computer won.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        elif player.ran_out_of_time:
+            draw_text(window, "You ran out of time.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+
+        # draw level number
+        draw_text(window, f"Level: {level}", ORANGE, 64, left_centre=(0, WINDOW_HEIGHT // 2))
 
         pygame.display.flip()
 
+        if player.has_won:
+            time.sleep(3)
+            return (True, player)
+        elif computer.has_won or player.ran_out_of_time:
+            time.sleep(3)
+            return (False, player)
+
+def main():
+    pygame.init()
+    window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    pygame.display.set_caption(WINDOW_CAPTION)
+
+    level = 1
+
+    running = True
+    while running:
+        beat_level, player = play_level(window, level)
+
+        if not beat_level:
+            # lose a life
+            player.lives -= 1
+            if player.lives < 0:
+                # restart
+                level = 1
+        else:
+            level += 1
+
     pygame.quit()
-    sys.exit(0)
+    sys.exit()
 
 
 if __name__ == "__main__":
