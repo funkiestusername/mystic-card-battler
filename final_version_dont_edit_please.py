@@ -399,12 +399,27 @@ class Computer(Competitor):
                     self.play_card(self.card_to_play)
                 else:
                     if self.num_cards_to_play_this_turn > 0:
+                        for card in self.hand:
+                            if card.damage_amount >= self.opponent.health:
+                                card.is_hidden = False
+                                self.card_to_play = card
+                                self.revealed_cards = 1
+                                return
+
+                        if self.health < self.opponent.health:
+                            best_heal_card = self.hand[0]
+                            for card in self.hand:
+                                if card.heal_amount > best_heal_card.heal_amount:
+                                    best_heal_card = card
+                            best_heal_card.is_hidden = False
+                            self.card_to_play = best_heal_card
+                            self.revealed_cards = 1
+                            return
+
                         card = random.choice(self.hand)
                         card.is_hidden = False
                         self.card_to_play = card
                         self.revealed_cards = 1
-                    else:
-                        self.is_next_card_forced = False
         else:
             # play randomly
             self.move_timer += dt
@@ -461,8 +476,8 @@ class Card:
 class GenericDamage(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "images/generic-damage.png")
-        self.damage_amount = 2
-        self.heal_amount = 1
+        self.damage_amount = 2 if self.upright else 0
+        self.heal_amount = 1 if not self.upright else 0
 
         self.upright_tooltip = f"Deal {self.damage_amount} to opponent"
         self.revered_tooltip = f"Heal {self.heal_amount} to yourself"
@@ -480,8 +495,8 @@ class GenericDamage(Card):
 class GenericHeal(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "images/generic-heal.png")
-        self.damage_amount = 1
-        self.heal_amount = 2
+        self.damage_amount = 1 if not self.upright else 0
+        self.heal_amount = 2 if self.upright else 0
 
         self.upright_tooltip = f"Heal {self.heal_amount} to yourself"
         self.revered_tooltip = f"Damage {self.damage_amount} to opponent"
@@ -672,8 +687,8 @@ class TheTower(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "images/the-tower.jpg")
 
-        self.damage_amount = 8
-        self.heal_amount = 8
+        self.damage_amount = 8 if self.upright else 0
+        self.heal_amount = 8 if not self.upright else 0
         self.upright_tooltip = "8 damage to you then 8 damage to the opponent"
         self.revered_tooltip = "heal both for 8"
         self.create_tooltip()
