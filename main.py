@@ -262,7 +262,7 @@ class Computer(Competitor):
 
         # currently plays randomly
         self.move_timer += dt
-        if self.move_timer >= 0.5:
+        if self.move_timer >= 0.8:
             self.move_timer = 0
 
             if self.num_cards_to_draw_this_turn > 0:
