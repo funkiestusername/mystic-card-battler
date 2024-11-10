@@ -113,6 +113,7 @@ class Competitor:
         self.is_next_card_blocked = False
         self.is_next_card_reversed = False
         self.is_next_card_mirrored = False
+        self.is_doing_double_damage = False
 
         self.is_computer = False
 
@@ -178,6 +179,7 @@ class Competitor:
         self.is_next_card_blocked = False
         self.is_next_card_reversed = False
         self.is_next_card_mirrored = False
+        self.is_doing_double_damage = False
 
         self.has_won = False
         self.playing_turn = False
@@ -200,6 +202,9 @@ class Competitor:
             card.heal_amount = card.heal_amount // 2
             card.draw_increase_amount = card.draw_increase_amount // 2
             card.play_increase_amount = card.play_increase_amount // 2
+
+        if self.is_doing_double_damage:
+            card.damage_amount *= 2
 
         self.last_card_played = card
         self.num_cards_to_play_this_turn -= 1
@@ -462,6 +467,7 @@ class Card:
         self.revered_tooltip = ""
         self.tooltip = None
         self.is_hidden = True
+        self.is_healing = False
 
     def create_tooltip(self):
         self.tooltip = Tooltip(self.upright_tooltip, self.revered_tooltip, self.upright)
@@ -495,6 +501,7 @@ class GenericHeal(Card):
         super().__init__(upright, played_on, played_from, "images/generic-heal.png")
         self.damage_amount = 1 if not self.upright else 0
         self.heal_amount = 2 if self.upright else 0
+        self.is_healing = True
 
         self.upright_tooltip = f"Heal {self.heal_amount} to yourself"
         self.revered_tooltip = f"Damage {self.damage_amount} to opponent"
@@ -572,6 +579,7 @@ class TheHighPriestess(Card):
 class TheEmpress(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "images/TheEmpress.jpg")
+        self.is_healing = True
         self.upright_tooltip = f"Increase max health by 2"
         self.revered_tooltip = f"Half numerical effectiveness of next opponent card"
         self.create_tooltip()
@@ -624,7 +632,7 @@ class TheLovers(Card):
 class TheChariot(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "images/TheChariot.jpg")
-
+        self.is_healing = True
         self.upright_tooltip = "Deal 2 damage to the opponent and heal 2"
         self.revered_tooltip = "Deal 5 damage to the opponent and half rounded down to use"
         self.create_tooltip()
@@ -684,7 +692,7 @@ class Temperance(Card):
 class TheTower(Card):
     def __init__(self, upright, played_on, played_from):
         super().__init__(upright, played_on, played_from, "images/the-tower.jpg")
-
+        self.is_healing = True
         self.damage_amount = 8 if self.upright else 0
         self.heal_amount = 8 if not self.upright else 0
         self.upright_tooltip = "8 damage to you then 8 damage to the opponent"
@@ -702,8 +710,39 @@ class TheTower(Card):
             self.played_from.health += self.heal_amount
             self.played_on.health += self.heal_amount
 
+class TheDevil(Card):
+    def __init__(self, upright, played_on, played_from):
+        super().__init__(upright, played_on, played_from, "images/the-devil.jpg")
 
-ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice, Temperance, TheTower]
+        self.upright_tooltip = "The opponent has all healing cards removed from deck"
+        self.revered_tooltip = "Remove all healing cards from your deck and double your damage"
+        self.create_tooltip()
+
+    def play(self):
+        if self.upright:
+            ##The opponent has all healing cards removed from deck
+            for card_class in self.played_on.deck.copy():
+                card = card_class(True, None, None)
+                if card.is_healing:
+                    self.played_on.deck.remove(card_class)
+
+            for card in self.played_on.hand.copy():
+                if card.is_healing:
+                    self.played_on.hand.remove(card)
+        else:
+            ##remove all healing cards from your deck but double damage (excluding arcana's) for level
+            self.played_from.is_doing_double_damage = True
+
+            for card_class in self.played_on.deck.copy():
+                card = card_class(True, None, None)
+                if card.is_healing:
+                    self.played_on.deck.remove(card_class)
+
+            for card in self.played_from.hand.copy():
+                if card.is_healing:
+                    self.played_from.hand.remove(card)
+
+ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess, TheLovers, Justice, Temperance, TheTower, TheDevil]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
 player = Player()
@@ -749,8 +788,8 @@ def play_level(window, level):
                         player.handle_mouse_click(pygame.mouse.get_pos())
 
         if not game_over:
-            computer.update()
             player.update(dt)
+            computer.update()
 
             if computer.playing_turn:
                 computer.have_turn(dt)
@@ -765,10 +804,10 @@ def play_level(window, level):
         player.draw(window)
         computer.draw(window)
 
-        if player.has_won:
-            draw_text(window, "You won the battle!", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
-        elif computer.has_won:
+        if computer.has_won:
             draw_text(window, "The computer won.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
+        elif player.has_won:
+            draw_text(window, "You won the battle!", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
         elif player.ran_out_of_time:
             draw_text(window, "You ran out of time.", YELLOW, 64, (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2))
 

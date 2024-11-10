@@ -630,7 +630,7 @@ class Temperance(Card):
 
 class TheDevil(Card):
     def __init__(self, upright, played_on, played_from):
-        super().__init__(upright, played_on, played_from, "images/the-devil.jpg.jpg")
+        super().__init__(upright, played_on, played_from, "images/the-devil.jpg")
 
 
         self.upright_tooltip = "The opponent has all healing cards removed from deck"
