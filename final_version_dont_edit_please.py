@@ -153,6 +153,25 @@ class Competitor:
         self.hand.append(self.deck[0](random.choice((True, False)), self.opponent, self))
         self.deck = self.deck[1:]
 
+    def reset(self):
+        self.deck = []
+        self.hand = []
+
+        self.max_health = MAX_HEALTH
+        self.health = self.max_health
+
+        self.num_cards_to_draw_this_turn = 1
+        self.num_cards_to_draw_next_turn = 1
+        self.num_cards_to_play_this_turn = 1
+        self.num_cards_to_play_next_turn = 1
+
+        self.is_next_card_forced = False
+        self.is_next_card_halved = False
+        self.is_next_card_blocked = False
+
+        self.has_won = False
+        self.playing_turn = False
+
     def play_card(self, card):
         if self.is_next_card_halved:
             self.is_next_card_halved = False
@@ -557,9 +576,17 @@ class TheChariot(Card):
 ALL_ARCANA_CARDS = [TheFool, TheChariot, TheMagician, TheEmpress, TheEmperor, TheHighPriestess]
 ALL_GENERIC_CARDS = [GenericDamage, GenericHeal]
 
-def play_level(window, player, computer, level):
+player = Player()
+computer = Computer()
+player.opponent = computer
+computer.opponent = player
+
+def play_level(window, level):
     background = pygame.image.load("images/background.png").convert_alpha()
     background = pygame.transform.scale(background, (900, 900))
+
+    player.reset()
+    computer.reset()
 
     player.init_deck()
     computer.init_deck()
@@ -621,35 +648,36 @@ def play_level(window, player, computer, level):
             return False
 
 def main():
+    global player, computer
     pygame.init()
     window = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
     pygame.display.set_caption(WINDOW_CAPTION)
 
     level = 1
 
-    player = Player()
-    computer = Computer()
-    player.opponent = computer
-    computer.opponent = player
-
     running = True
     while running:
-        beat_level = play_level(window, player, computer, level)
+        beat_level = play_level(window, level)
 
         if not beat_level:
             player.lives -= 1
             tmp = player.lives
             player = Player()
             player.lives = tmp
+            computer = Computer()
+            player.opponent = computer
+            computer.opponent = player
             if player.lives < 0:
                 level = 1
                 player = Player()
                 computer = Computer()
+                player.opponent = computer
+                computer.opponent = player
         else:
-            tmp = player.lives
             player = Player()
-            player.lives = tmp
             computer = Computer()
+            player.opponent = computer
+            computer.opponent = player
             level += 1
 
     pygame.quit()
